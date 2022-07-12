@@ -43,7 +43,7 @@
         "grammars": [
             {
                 "language": "unison",
-                "scopeName": "source.unison",
+                "scopeName": "source.u",
                 "path": "./syntaxes/unison.tmLanguage.json"
             }
         ],
