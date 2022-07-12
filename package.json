@@ -1,0 +1,81 @@
+{
+  "name": "unison",
+  "displayName": "Unison",
+  "description": "Unison language support",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.69.0"
+  },
+  "categories": [
+    "Programming Languages"
+  ],
+  "keywords": [
+    "unison",
+    "unison-lang",
+    "vscode",
+    "lsp",
+    "extension"
+  ],
+  "activationEvents": [
+    "onLanguage:unison"
+  ],
+  "author": "Unison Computing",
+  "contributes": {
+    "languages": [
+      {
+        "id": "unison",
+        "aliases": [
+          "Unison",
+          "unison",
+          "unison-lang"
+        ],
+        "extensions": [
+          "u",
+          "uu"
+        ],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "unison",
+        "scopeName": "source.unison",
+        "path": "./syntaxes/unison.tmLanguage.json"
+      }
+    ],
+    "configuration": {
+      "type": "object",
+      "title": "Multi LSP configuration",
+      "properties": {
+        "unison.lspPort": {
+          "scope": "resource",
+          "type": "number",
+          "default": 5050,
+          "description": "The port for connecting to UCM's language server."
+        },
+        "unison.trace.server": {
+          "scope": "window",
+          "type": "string",
+          "enum": [
+            "off",
+            "messages",
+            "verbose"
+          ],
+          "default": "off",
+          "description": "Traces the communication between VSCode and the language server."
+        }
+      }
+    }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/unisonweb/vscode-extension.git"
+  },
+  "bugs": {
+    "url": "https://github.com/unisonweb/vscode-extension/issues"
+  },
+  "homepage": "https://github.com/unisonweb/vscode-extension#readme",
+  "dependencies": {
+    "vscode-languageclient": "^8.0.1"
+  }
+}
