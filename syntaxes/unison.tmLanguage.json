@@ -1,32 +1,250 @@
 {
-	"$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
-	"name": "Unison",
-	"patterns": [
-		{
-			"include": "#keywords"
-		},
-		{
-			"include": "#strings"
-		}
-	],
-	"repository": {
-		"keywords": {
-			"patterns": [{
-				"name": "keyword.control.unison",
-				"match": "\\b(if|while|for|return)\\b"
-			}]
-		},
-		"strings": {
-			"name": "string.quoted.double.unison",
-			"begin": "\"",
-			"end": "\"",
-			"patterns": [
-				{
-					"name": "constant.character.escape.unison",
-					"match": "\\\\."
-				}
-			]
-		}
-	},
-	"scopeName": "source.unison"
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "Unison",
+  "patterns": [{
+    "include": "#comment"
+  },{
+    "include": "#boolean"
+  },{
+    "include": "#numeric"
+  },{
+    "include": "#text"
+  },{
+    "include": "#match_with"
+  },{
+    "include": "#control"
+  },{
+    "include": "#annotation"
+  },{
+    "include": "#forall"
+  },{
+    "include": "#arrow"
+  },{
+    "include": "#watch"
+  },{
+    "include": "#test_watch"
+  },{
+    "include": "#unsorted_reserved_chars"
+  },{
+    "include": "#unsorted_keywords"
+  }],
+  "repository": {
+    "annotation": {
+      "name": "meta.function.type-declaration.unison",
+      "match": "([^\\r\\n\\t\\f\\v \"]+)\\s*(:)(?=\\s)",
+      "captures": {
+        "1": {
+          "name": "entity.name.function.unison"
+        },
+        "2": {
+          "name": "keyword.other.colon.unison"
+        }
+      }
+    },
+    "boolean": {
+      "patterns": [{
+        "include": "#true"
+      },{
+        "include": "#false"
+      }]
+    },
+    "true": {
+      "match": "true",
+      "name": "constant.language.boolean.true.unison"
+    },
+    "false": {
+      "match": "false",
+      "name": "constant.language.boolean.false.unison"
+    },
+    "match_with": {
+      "match": "(\\s|^)(match|with|->)(?=\\s|$)",
+      "captures": {
+        "2": {
+          "name": "keyword.control.case.unison"
+        }
+      }
+    },
+    "comment": {
+      "patterns": [{
+        "include": "#eof_comment"
+      },{
+        "include": "#line_comment"
+      }]
+    },
+    "eof_comment": {
+      "name": "comment.block.eof.unison",
+      "begin": "^---",
+      "end": "\\z"
+    },
+    "block_comment": {
+      "name": "comment.block.unison",
+      "begin": "{-",
+      "end": "-}",
+      "beginCaptures": {
+        "0": {
+          "name": "punctuation.definition.comment.begin.unison"
+        }
+      },
+      "endCaptures": {
+        "0": {
+          "name": "punctuation.definition.comment.end.unison"
+        }
+      }
+    },
+    "line_comment": {
+      "patterns": [{
+        "begin": "(^\\s+)?(?=--)",
+        "beginCaptures": {
+          "1": {
+            "name": "punctuation.whitespace.comment.leading.unison"
+          }
+        },
+        "end": "(?=$)",
+        "patterns": [{
+          "name": "comment.line.double-dash.unison",
+          "begin": "(?<!-)--(?:(?!-)|(?=--))",
+          "beginCaptures": {
+            "0": {
+              "name": "punctuation.definition.comment.unison"
+            }
+          },
+          "end": "(?=$)"
+        }]
+      }]
+    },
+    "control": {
+      "match": "\\b(if|then|else|and|or)\\b",
+      "captures": {
+        "1": {
+          "name": "keyword.control.unison"
+        }
+      }
+    },
+    "numeric": {
+      "patterns": [{
+        "include": "#float"
+      },{
+        "include": "#int"
+      },{
+        "#include": "#nat"
+      }]
+    },
+    "float": {
+      "match": "([^+\\-\\w\\d]|^)([+-]?\\d+\\.\\d*)",
+      "captures": {
+        "2": {
+          "name": "constant.numeric.decimal.unison"
+        }
+      }
+    },
+    "int": {
+      "match": "([^\\w\\d]|^)([+-]\\d+)",
+      "captures": {
+        "2": {
+          "name": "constant.numeric.integer.signed.unison"
+        }
+      }
+    },
+    "nat": {
+      "match": "([^+\\-\\w\\d]|^)(\\d+)",
+      "captures": {
+        "2": {
+          "name": "constant.numeric.integer.unsigned.unison"
+        }
+      }
+    },
+    "text": {
+      "name": "string.quoted.double.unison",
+      "match": "(\")(.*?)(\")",
+      "captures": {
+        "1": {
+          "name": "punctuation.definition.string.begin.unison"
+        },
+        "3": {
+          "name": "punctuation.definition.string.end.unison"
+        }
+      }
+    },
+    "forall": {
+      "match": "(\\s|^)(forall|∀)(?=\\s|^)",
+      "captures": {
+        "2": {
+          "name": "keyword.other.forall.unison"
+        }
+      }
+    },
+    "arrow": {
+      "match": "(->)",
+      "captures": {
+        "1": {
+          "name": "keyword.other.arrow.unison"
+        }
+      }
+    },
+    "watch": {
+      "match": "^(>)",
+      "captures": {
+        "1": {
+          "name": "keyword.other.watch.expression.unison"
+        }
+      }
+    },
+    "test_watch": {
+      "match": "^(test>)",
+      "captures": {
+        "1": {
+          "name": "keyword.other.test.watch.expression.unison"
+        }
+      }
+    },
+    "use": {
+      "match": "(\\s|^)(use)(?=\\s|$)",
+      "captures": {
+        "2": {
+          "name": "keyword.control.import.unison"
+        }
+      }
+    },
+    "unsorted_keywords": {
+      "match": "(\\s|^)(let|alias|handle|in|namespace|type|ability|where|unique|use|with)(?=\\s|$)",
+      "captures": {
+        "2": {
+          "name": "keyword.control.unison"
+        }
+      }
+    },
+    "unsorted_reserved_chars": {
+      "match": "(,)|('|!)|(\\[)|(\\])|({)|(})|(@)|(\\|)|(#)",
+      "captures": {
+        "1": {
+          "name": "punctuation.separator.delimiter.unison"
+        },
+        "2": {
+          "name": "punctuation.definition.delayed.unison"
+        },
+        "3": {
+          "name": "punctuation.definition.list.begin.unison"
+        },
+        "4": {
+          "name": "punctuation.definition.list.end.unison"
+        },
+        "5": {
+          "name": "punctuation.definition.ability.begin.unison"
+        },
+        "6": {
+          "name": "punctuation.definition.ability.end.unison"
+        },
+        "7": {
+          "name": "punctuation.operator.assignment.as.unison"
+        },
+        "8": {
+          "name": "punctuation.separator.pipe.unison"
+        },
+        "9": {
+          "name": "punctuation.definition.hash.unison"
+        }
+      }
+    }
+  },
+  "scopeName": "source.u"
 }
