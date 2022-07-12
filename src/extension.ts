@@ -42,8 +42,8 @@ async function removeWorkspaceFolder(workspaceFolder: WorkspaceFolder) {
 }
 
 async function connectToServer() {
-  workspace.getConfiguration("unison");
-  let socket = connect({ port: 5757, host: "127.0.0.1" });
+  const port = workspace.getConfiguration("unison").lspPort;
+  let socket = connect({ port, host: "127.0.0.1" });
 
   await new Promise((resolve, reject) =>
     socket.once("connect", resolve).once("error", reject)

@@ -12,7 +12,12 @@ Ensure an instance of the UCM is running before starting your editor.
 
 ## Extension Settings
 
-No settings
+```
+{
+  // The port where UCM is serving the language server
+  "unison.lspPort" = 5757
+}
+```
 
 ## Release Notes
 
