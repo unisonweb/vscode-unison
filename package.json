@@ -3,7 +3,7 @@
     "displayName": "Unison",
     "publisher": "Unison Computing",
     "description": "Unison language support",
-    "version": "0.0.1",
+    "version": "0.0.2",
     "main": "./out/main.js",
     "engines": {
         "vscode": "^1.69.0"
