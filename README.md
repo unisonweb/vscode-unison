@@ -17,6 +17,8 @@ This extension is currently under development, to install a development build, f
 
 * Download the latest `unison-x.y.z.vsix` from the [Releases tab](https://github.com/unisonweb/vscode-unison/releases)
 * Install it into your VS Code from a shell using `code --install-extension unison-x.y.z.vsix`
+* Build `ucm` from source from the [`cp/lsp-II` branch](https://github.com/unisonweb/unison/tree/cp/lsp-II)
+* Ensure UCM is running before starting VS code
 
 ## Extension Settings
 
