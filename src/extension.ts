@@ -1,9 +1,9 @@
-const { workspace, window } = require("vscode");
-const { LanguageClient } = require("vscode-languageclient/node");
-const { connect } = require("node:net");
+import { workspace, window, WorkspaceFolder, OutputChannel } from "vscode";
+import { LanguageClient } from "vscode-languageclient/node";
+import { connect } from "node:net";
 
-const outputChannel = window.createOutputChannel("Unison");
-const clients = new Map();
+const outputChannel: OutputChannel = window.createOutputChannel("Unison");
+const clients: Map<string, LanguageClient> = new Map();
 
 exports.activate = function () {
   workspace.workspaceFolders?.forEach((folder) => addWorkspaceFolder(folder));
@@ -17,7 +17,7 @@ exports.deactivate = async function () {
   await Promise.all([...clients.values()].map((client) => client.stop()));
 };
 
-async function addWorkspaceFolder(workspaceFolder) {
+async function addWorkspaceFolder(workspaceFolder: WorkspaceFolder) {
   let folderPath = workspaceFolder.uri.fsPath;
   if (clients.has(folderPath)) return;
 
@@ -32,7 +32,7 @@ async function addWorkspaceFolder(workspaceFolder) {
   await client.start();
 }
 
-async function removeWorkspaceFolder(workspaceFolder) {
+async function removeWorkspaceFolder(workspaceFolder: WorkspaceFolder) {
   let folderPath = workspaceFolder.uri.fsPath;
   let client = clients.get(folderPath);
   if (client) {
@@ -42,6 +42,7 @@ async function removeWorkspaceFolder(workspaceFolder) {
 }
 
 async function connectToServer() {
+  workspace.getConfiguration("unison");
   let socket = connect({ port: 5757, host: "127.0.0.1" });
 
   await new Promise((resolve, reject) =>
