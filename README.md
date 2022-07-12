@@ -10,6 +10,14 @@ This plugin requires the [**UCM** (Unison Codebase Manager)](https://github.com/
 
 Ensure an instance of the UCM is running before starting your editor.
 
+
+## Installing
+
+This extension is currently under development, to install a development build, follow these steps:
+
+* Download the latest `unison-x.y.z.vsix` from the [Releases tab](https://github.com/unisonweb/vscode-unison/releases)
+* Install it into your VS Code from a shell using `code --install-extension unison-x.y.z.vsix`
+
 ## Extension Settings
 
 ```

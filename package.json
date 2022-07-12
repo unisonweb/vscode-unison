@@ -4,7 +4,7 @@
     "publisher": "Unison Computing",
     "description": "Unison language support",
     "version": "0.0.1",
-    "main": "./out/extension.js",
+    "main": "./out/main.js",
     "engines": {
         "vscode": "^1.69.0"
     },
