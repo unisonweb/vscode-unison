@@ -46,21 +46,27 @@ async function sleep(ms: number): Promise<void> {
 }
 
 async function connectToServer() {
+  let haveShownError = false;
   while (true) {
     try {
       const port = workspace.getConfiguration("unison").lspPort;
       let socket = connect({ port, host: "127.0.0.1" });
-      console.log("Attempting to connect to LSP Server");
       await new Promise((resolve, reject) =>
         socket.once("connect", resolve).once("error", reject)
       );
-      console.log("Connected!");
+      // Show a success message, but only if we were in an error state
+      if (haveShownError) {
+        window.showInformationMessage("Unison: Connected to Language Server.");
+      }
       return { reader: socket, writer: socket };
     } catch (e) {
-      console.log("ERROR!");
-      console.error(e);
+      if (!haveShownError) {
+        haveShownError = true;
+        window.showErrorMessage(
+          "Unison: Language server failed to connect, is UCM running?"
+        );
+      }
       await sleep(2000);
-      console.log("Trying again!");
       continue;
     }
   }
