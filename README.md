@@ -22,6 +22,9 @@ This extension is currently under development, to install a development build, f
 
 ## Extension Settings
 
+The default settings are configured for you, so there's no need to make changes.
+If you'd like to override the defaults you can do so with the following options:
+
 ```
 {
   // The port where UCM is serving the language server
