@@ -2,7 +2,8 @@
 
 ## Features
 
-Please see [this page](https://github.com/unisonweb/unison/blob/trunk/docs/language-server.markdown) for a description of supported features.
+* In-editor diagnostics and error messages
+* Code-actions to resolve ambiguous names
 
 ## Requirements
 
