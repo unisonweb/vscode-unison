@@ -41,13 +41,27 @@ async function removeWorkspaceFolder(workspaceFolder: WorkspaceFolder) {
   }
 }
 
+async function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 async function connectToServer() {
-  const port = workspace.getConfiguration("unison").lspPort;
-  let socket = connect({ port, host: "127.0.0.1" });
-
-  await new Promise((resolve, reject) =>
-    socket.once("connect", resolve).once("error", reject)
-  );
-
-  return { reader: socket, writer: socket };
+  while (true) {
+    try {
+      const port = workspace.getConfiguration("unison").lspPort;
+      let socket = connect({ port, host: "127.0.0.1" });
+      console.log("Attempting to connect to LSP Server");
+      await new Promise((resolve, reject) =>
+        socket.once("connect", resolve).once("error", reject)
+      );
+      console.log("Connected!");
+      return { reader: socket, writer: socket };
+    } catch (e) {
+      console.log("ERROR!");
+      console.error(e);
+      await sleep(2000);
+      console.log("Trying again!");
+      continue;
+    }
+  }
 }
