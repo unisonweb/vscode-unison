@@ -2,9 +2,9 @@
     "name": "unison",
     "displayName": "Unison Language",
     "publisher": "unison-lang",
-    "description": "Unison language support",
+    "description": "Official extension for unison language support",
     "version": "0.0.5",
-    "icon": "./images/unison.png",
+    "icon": "images/unison.png",
     "main": "./out/main.js",
     "engines": {
         "vscode": "^1.69.0"
@@ -23,7 +23,9 @@
         "onLanguage:unison"
     ],
     "author": "Unison Computing",
-    "galleryBanner.color": "#41424B",
+    "galleryBanner": {
+       "color": "#41424B"
+    },
     "contributes": {
         "languages": [
             {
