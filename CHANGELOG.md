@@ -1,5 +1,9 @@
 # Change Log
 
+## 0.0.6
+
+- Updates to extension description
+
 ## 0.0.5
 
 - Prepare for publishing to the VSCode marketplace
