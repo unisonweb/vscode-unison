@@ -63,7 +63,7 @@ async function connectToServer() {
       if (!haveShownError) {
         haveShownError = true;
         window.showErrorMessage(
-          "Unison: Language server failed to connect, is UCM running?"
+          "Unison: Language server failed to connect, is there a UCM running? (version M4a or later)"
         );
       }
       await sleep(2000);
