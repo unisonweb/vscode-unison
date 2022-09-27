@@ -1,8 +1,16 @@
 # Change Log
 
-All notable changes to the "unison" extension will be documented in this file.
+## 0.0.5
 
-Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
+- Prepare for publishing to the VSCode marketplace
+
+## 0.0.4
+
+- Updates to error messages and logos.
+
+## 0.0.3
+
+- Add auto-reconnect feature if connection is disrupted.
 
 ## 0.0.2
 

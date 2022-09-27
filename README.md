@@ -1,25 +1,20 @@
 # Unison for Visual Studio Code
 
+Official editor support for the [Unison language](https://unison-lang.org/).
+
+Provides syntax highlighting and Language Server support.
+
 ## Features
 
-* In-editor diagnostics and error messages
-* Code-actions to resolve ambiguous names
+Learn about features [here](https://github.com/unisonweb/unison/blob/trunk/docs/language-server.markdown).
 
 ## Requirements
 
 This plugin requires the [**UCM** (Unison Codebase Manager)](https://github.com/unisonweb/unison).
 
-Ensure an instance of the UCM is running before starting your editor.
-
-
 ## Installing
 
-This extension is currently under development, to install a development build, follow these steps:
-
-* Download the latest `unison-x.y.z.vsix` from the [Releases tab](https://github.com/unisonweb/vscode-unison/releases)
-* Install it into your VS Code from a shell using `code --install-extension unison-x.y.z.vsix`
-* Build `ucm` from source from the [`cp/lsp-II` branch](https://github.com/unisonweb/unison/tree/cp/lsp-II)
-* Ensure UCM is running before starting VS code
+Install from the [VSCode Marketplace](https://marketplace.visualstudio.com/items?itemName=unison-lang.unison)
 
 ## Extension Settings
 
@@ -50,4 +45,3 @@ Or optionally, using the VS code extension host:
 * `cd vscode-unison`
 * `code .`
 * Press F5 to load the extension host.
-
