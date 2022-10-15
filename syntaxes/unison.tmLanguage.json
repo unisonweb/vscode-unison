@@ -10,6 +10,8 @@
   },{
     "include": "#text"
   },{
+    "include": "#char"
+  },{
     "include": "#match_with"
   },{
     "include": "#control"
@@ -69,6 +71,8 @@
         "include": "#eof_comment"
       },{
         "include": "#line_comment"
+      },{
+        "include": "#block_comment"
       }]
     },
     "eof_comment": {
@@ -155,13 +159,37 @@
     },
     "text": {
       "name": "string.quoted.double.unison",
-      "match": "(\")(.*?)(\")",
+      "begin": "\"",
+      "end": "\"",
+      "beginCaptures": {
+        "0": {
+          "name": "punctuation.definition.string.begin.unison"
+        }
+      },
+      "endCaptures": {
+        "0": {
+          "name": "punctuation.definition.string.end.unison"
+        }
+      },
+      "patterns": [
+        {
+          "name": "constant.character.escape.unison",
+          "match": "\\\\."
+        }
+      ]
+    },
+    "char": {
+      "name": "string.quoted.single.unison",
+      "match": "([?])(([\\\\].)|([^\\\\]))",
       "captures": {
         "1": {
           "name": "punctuation.definition.string.begin.unison"
         },
         "3": {
-          "name": "punctuation.definition.string.end.unison"
+          "name": "constant.character.escape.unison"
+        },
+        "4": {
+          "name": "string.quoted.single.unison"
         }
       }
     },
