@@ -82,7 +82,6 @@
     "scripts": {
         "compile": "tsc -b",
         "watch": "tsc -b -w",
-
         "vscode:prepublish": "npm run esbuild-base -- --minify",
         "vscode:package": "npm run vscode:prepublish && vsce package",
         "esbuild-base": "esbuild ./src/extension.ts --bundle --outfile=out/main.js --external:vscode --format=cjs --platform=node",
@@ -96,7 +95,7 @@
         "@types/node": "^18.0.3",
         "@types/vscode": "^1.69.0",
         "esbuild": "^0.14.49",
-        "typescript": "^4.7.2",
+        "typescript": "^4.8.4",
         "vsce": "^2.9.2"
     },
     "license": "SEE LICENSE IN LICENSE"
