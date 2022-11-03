@@ -84,6 +84,7 @@ async function connectToServer() {
         // Only ever try to open the terminal once, so we don't get stuck in weird loops
         // or in a strange state if the user tries to quit UCM or close the terminal.
         if (!haveOpenedTerminal && workspace.getConfiguration("unison").automaticallyOpenUCM) {
+          haveOpenedTerminal = true;
           // Start up a new terminal in the IDE, tell it to run UCM, and then show it.
           window.showInformationMessage("Attemping to launch UCM in the embedded terminal.");
           const terminal = window.createTerminal();
