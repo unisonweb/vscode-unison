@@ -4,6 +4,7 @@ import { connect } from "node:net";
 
 const outputChannel: OutputChannel = window.createOutputChannel("Unison");
 const clients: Map<string, LanguageClient> = new Map();
+let haveOpenedTerminal = false;
 
 function log(msg: string) {
   outputChannel.appendLine(msg)
@@ -52,7 +53,6 @@ async function sleep(ms: number): Promise<void> {
 
 async function connectToServer() {
   let haveShownError = false;
-  let haveOpenedTerminal = false;
 
   while (true) {
     try {
