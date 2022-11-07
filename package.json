@@ -3,7 +3,7 @@
     "displayName": "Unison Language",
     "publisher": "unison-lang",
     "description": "Official extension for unison language support",
-    "version": "0.0.7",
+    "version": "0.0.8",
     "icon": "images/unison.png",
     "main": "./out/main.js",
     "engines": {
@@ -67,6 +67,18 @@
                     ],
                     "default": "off",
                     "description": "Traces the communication between VSCode and the language server."
+                },
+                "unison.automaticallyOpenUCM": {
+                    "scope": "window",
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Automatically open an embedded terminal and start UCM if no existing UCM session is detected."
+                },
+                "unison.ucmCommand": {
+                    "scope": "window",
+                    "type": "string",
+                    "default": "ucm",
+                    "description": "Which command to run when automatically opening ucm in a terminal."
                 }
             }
         }
