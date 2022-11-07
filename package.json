@@ -96,6 +96,7 @@
         "watch": "tsc -b -w",
         "vscode:prepublish": "npm run esbuild-base -- --minify",
         "vscode:package": "npm run vscode:prepublish && vsce package",
+        "publish": "npm run vscode:package && vsce publish",
         "esbuild-base": "esbuild ./src/extension.ts --bundle --outfile=out/main.js --external:vscode --format=cjs --platform=node",
         "esbuild": "npm run esbuild-base -- --sourcemap",
         "esbuild-watch": "npm run esbuild-base -- --sourcemap --watch"
