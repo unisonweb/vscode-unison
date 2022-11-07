@@ -3,7 +3,7 @@
     "displayName": "Unison Language",
     "publisher": "unison-lang",
     "description": "Official extension for unison language support",
-    "version": "0.0.7",
+    "version": "0.0.8",
     "icon": "images/unison.png",
     "main": "./out/main.js",
     "engines": {
@@ -72,7 +72,13 @@
                     "scope": "window",
                     "type": "boolean",
                     "default": true,
-                    "description": "If true and we fail to find a running UCM instance, automatically open an embedded terminal and start UCM."
+                    "description": "Automatically open an embedded terminal and start UCM if no existing UCM session is detected."
+                },
+                "unison.ucmCommand": {
+                    "scope": "window",
+                    "type": "string",
+                    "default": "ucm",
+                    "description": "Which command to run when automatically opening ucm in a terminal."
                 }
             }
         }
