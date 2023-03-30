@@ -35,7 +35,8 @@ See the [CHANGELOG](./CHANGELOG.md) for updates.
 ## Development
 
 * Clone the project
-* Symlink the project into your `~/.vscode/extensions` folder, e.g. `ln -s ~/Projects/vscode-unison ~/.vscode/extension/unison-dev`
+* Symlink the project into your `~/.vscode/extensions` folder, e.g. `ln -s ~/Projects/vscode-unison ~/.vscode/extensions/unison-dev`
+* `npm i`
 * `npm run watch`
 * Restart Visual Studio Code
 
