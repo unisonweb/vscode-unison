@@ -46,3 +46,13 @@ Or optionally, using the VS code extension host:
 * `cd vscode-unison`
 * `code .`
 * Press F5 to load the extension host.
+
+## Deploying
+
+Follow [this guide](https://code.visualstudio.com/api/working-with-extensions/publishing-extension) to get your account set up, contact @ChrisPenner to get access to the `unison-lang` publisher.
+
+Then:
+
+```
+npm run publish
+```
