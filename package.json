@@ -55,7 +55,7 @@
                     "scope": "resource",
                     "type": "number",
                     "default": 5757,
-                    "description": "The port of a running UCM language server. You can overwride thise by setting the UNISON_LSP_PORT environment variable when running UCM."
+                    "description": "The port of a running UCM language server. You can override thise by setting the UNISON_LSP_PORT environment variable when running UCM."
                 },
                 "unison.trace.server": {
                     "scope": "window",
