@@ -92,6 +92,7 @@
     },
     "homepage": "https://github.com/unisonweb/vscode-extension#readme",
     "scripts": {
+        "start": "npm run esbuild-watch",
         "compile": "tsc -b",
         "watch": "tsc -b -w",
         "vscode:prepublish": "npm run esbuild-base -- --minify",

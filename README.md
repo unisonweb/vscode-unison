@@ -34,18 +34,9 @@ See the [CHANGELOG](./CHANGELOG.md) for updates.
 
 ## Development
 
-* Clone the project
-* Symlink the project into your `~/.vscode/extensions` folder, e.g. `ln -s ~/Projects/vscode-unison ~/.vscode/extensions/unison-dev`
-* `npm i`
-* `npm run watch`
-* Restart Visual Studio Code
-
-Or optionally, using the VS code extension host:
-
-* `git clone https://github.com/unisonweb/vscode-unison`
-* `cd vscode-unison`
-* `code .`
-* Press F5 to load the extension host.
+* Run the build in watch mode in a separate terminal: `npm start`
+* Open the project in VS Code: `code .`
+* Press F5 to load the extension into the VS Code extension host.
 
 ## Deploying
 
