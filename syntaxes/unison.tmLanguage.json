@@ -3,9 +3,6 @@
   "name": "Unison",
   "patterns": [
     {
-      "include": "#unit"
-    },
-    {
       "include": "#doc_block"
     },
     {
@@ -46,6 +43,9 @@
     },
     {
       "include": "#unsorted_reserved_chars"
+    },
+    {
+      "include": "#unit"
     },
     {
       "include": "#unsorted_keywords"
@@ -404,7 +404,7 @@
       }
     },
     "unsorted_keywords": {
-      "match": "(\\s|^)(let|alias|handle|in|namespace|type|ability|where|unique|structural|use|with)(?=\\s|$)",
+      "match": "(\\s|^)(let|alias|handle|in|namespace|type|ability|where|unique|structural|use|with|\\|\\||&&)(?=\\s|$)",
       "captures": {
         "2": {
           "name": "keyword.control.unison"
