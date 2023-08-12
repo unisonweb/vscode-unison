@@ -12,10 +12,10 @@
       "include": "#boolean"
     },
     {
-      "include": "#numeric"
+      "include": "#text"
     },
     {
-      "include": "#text"
+      "include": "#numeric"
     },
     {
       "include": "#char"
