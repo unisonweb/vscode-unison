@@ -97,13 +97,13 @@
           "include": "#docref"
         },
         {
-          "match": "[^\\s]+",
+          "match": "[\\S]+",
           "name": "string.interpolated.doc.word.unison"
         }
       ]
     },
     "docheading": {
-      "begin": "(?:^|\\G)(#{1,6})\\s*(?=[\\S[^#]])",
+      "begin": "(?:(^|\\G)\\s*)(#{1,6})\\s*(?=[\\S[^#]])",
       "end": "\\s*(#{1,6})?$\\n?",
       "name": "markup.heading.doc.unison"
     },
@@ -138,7 +138,7 @@
       "name": "markup.bold.doc.unison"
     },
     "docquasiquote": {
-      "begin": "{{",
+      "begin": "(?:[^{]){{(?=[^{])",
       "end": "}}",
       "patterns": [
         {
@@ -147,7 +147,7 @@
       ]
     },
     "doc_inline_example": {
-      "begin": "``",
+      "begin": "(?:[^`])``(?=[^`])",
       "end": "``",
       "patterns": [
         {
@@ -175,7 +175,7 @@
       }
     },
     "docref": {
-      "match": "((@source|@signature|@signatures|@foldedSource)\\s*)?({)((type\\s+)?[\\w\\.'()!@#$%^&*+-]+)(})",
+      "match": "((@source|@signature|@signatures|@foldedSource)\\s*)?({\\s*)((type\\s+)?([\\w\\.'()!@#$%^&*+-]+\\s*(,)\\s*)*[\\w\\.'()!@#$%^&*+-]+(?=\\s*}))(\\s*})",
       "captures": {
         "1": {
           "name": "meta.preprocessor.doc.directive.begin.unison"
@@ -193,6 +193,12 @@
           "name": "keyword.control.unison"
         },
         "6": {
+          "name": "variable.name.doc.ref.unison"
+        },
+        "7": {
+          "name": "punctuation.separator.delimiter.unison"
+        },
+        "8": {
           "name": "meta.preprocessor.doc.directive.end.unison"
         }
       }
@@ -228,7 +234,7 @@
       "name": "constant.language.boolean.false.unison"
     },
     "match_with": {
-      "match": "(\\s|^)(match|with|->)(?=\\s|$)",
+      "match": "(\\s|^)(match|with|->|cases)(?=\\s|$)",
       "captures": {
         "2": {
           "name": "keyword.control.case.unison"
@@ -320,7 +326,7 @@
       }
     },
     "int": {
-      "match": "([^\\w\\d]|^)([+-]?\\d+)",
+      "match": "([^\\w\\d]|^)([+-]?\\d+\\b)",
       "captures": {
         "2": {
           "name": "constant.numeric.integer.unison"
@@ -396,17 +402,17 @@
       }
     },
     "use": {
-      "match": "(\\s|^)(use)(?=\\s|$)",
+      "match": "\\buse\\b",
       "captures": {
-        "2": {
+        "0": {
           "name": "keyword.control.import.unison"
         }
       }
     },
     "unsorted_keywords": {
-      "match": "(\\s|^)(do|let|alias|handle|in|namespace|type|ability|where|unique|structural|use|with|\\|\\||&&)(?=\\s|$)",
+      "match": "\\b(do|cases|match|let|alias|handle|in|namespace|type|ability|where|unique|structural|use|with|\\|\\||&&)\\b",
       "captures": {
-        "2": {
+        "1": {
           "name": "keyword.control.unison"
         }
       }
