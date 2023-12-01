@@ -1,9 +1,9 @@
-import { workspace, window, WorkspaceFolder, OutputChannel } from "vscode";
+import { workspace, window, OutputChannel } from "vscode";
 import { LanguageClient } from "vscode-languageclient/node";
 import { connect } from "node:net";
 
 const outputChannel: OutputChannel = window.createOutputChannel("Unison");
-const clients: Map<string, LanguageClient> = new Map();
+let client: LanguageClient;
 // This is global mutable state so that when the extension host gets restarted after
 // the terminal is closed, we don't immediately open another one.
 let shouldOpenTerminal = true;
@@ -13,41 +13,21 @@ function log(msg: string) {
 }
 
 exports.activate = function () {
-  workspace.workspaceFolders?.forEach((folder) => addWorkspaceFolder(folder));
-  workspace.onDidChangeWorkspaceFolders(({ added, removed }) => {
-    added.forEach((folder) => addWorkspaceFolder(folder));
-    removed.forEach((folder) => removeWorkspaceFolder(folder));
-  });
-};
-
-exports.deactivate = async function () {
-  await Promise.all([...clients.values()].map((client) => client.stop()));
-};
-
-async function addWorkspaceFolder(workspaceFolder: WorkspaceFolder) {
-  let folderPath = workspaceFolder.uri.fsPath;
-  if (clients.has(folderPath)) return;
-
-  let client = new LanguageClient("unison", "Unison", connectToServer, {
-    workspaceFolder,
+  client = new LanguageClient("unison", "Unison", connectToServer, {
     outputChannel,
     documentSelector: [{ language: "unison" }],
   });
 
-  log(`Activating unison language server at ${folderPath}`);
-  clients.set(folderPath, client);
-  await client.start();
-}
+  log("Activating unison language server.");
+  client.start();
+};
 
-async function removeWorkspaceFolder(workspaceFolder: WorkspaceFolder) {
-  let folderPath = workspaceFolder.uri.fsPath;
-  let client = clients.get(folderPath);
-  if (client) {
-    log(`Deactivating unison language server at ${folderPath}`);
-    clients.delete(folderPath);
-    await client.stop();
+exports.deactivate = async function () {
+  if (!client) {
+    return undefined;
   }
-}
+  return client.stop();
+};
 
 async function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
