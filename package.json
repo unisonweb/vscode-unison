@@ -3,7 +3,7 @@
     "displayName": "Unison Language",
     "publisher": "unison-lang",
     "description": "Official extension for unison language support",
-    "version": "1.0.1",
+    "version": "1.1.0",
     "icon": "images/unison.png",
     "main": "./out/main.js",
     "engines": {
@@ -110,7 +110,7 @@
         "@types/vscode": "^1.69.0",
         "esbuild": "^0.14.49",
         "typescript": "^4.8.4",
-        "vsce": "^2.9.2"
+        "@vscode/vsce": "^2.15.0"
     },
     "license": "SEE LICENSE IN LICENSE"
 }

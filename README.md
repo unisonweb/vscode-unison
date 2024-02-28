@@ -40,10 +40,11 @@ See the [CHANGELOG](./CHANGELOG.md) for updates.
 
 ## Deploying
 
-Follow [this guide](https://code.visualstudio.com/api/working-with-extensions/publishing-extension) to get your account set up, contact @ChrisPenner to get access to the `unison-lang` publisher.
+Follow [this guide](https://code.visualstudio.com/api/working-with-extensions/publishing-extension) to get your account set up, contact @ChrisPenner to get access to the `unison-lang` [publisher](https://dev.azure.com/unison-lang).
 
 Then:
 
-```
-npm run publish
+```sh
+$ vsce login unison-lang
+$ npm run publish
 ```
