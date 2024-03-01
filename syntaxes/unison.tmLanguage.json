@@ -52,22 +52,10 @@
     }
   ],
   "repository": {
-    "doc_block": {
-      "begin": "{{",
-      "end": "}}",
-      "beginCaptures": {
-        "0": {
-          "name": "string.interpolated.begin.doc.unison"
-        }
-      },
-      "endCaptures": {
-        "0": {
-          "name": "string.interpolated.end.doc.unison"
-        }
-      },
+    "doc_para": {
       "patterns": [
         {
-          "include": "#docheading"
+          "include": "#doclink"
         },
         {
           "include": "#docbold"
@@ -102,6 +90,28 @@
         }
       ]
     },
+    "doc_block": {
+      "begin": "{{",
+      "end": "}}",
+      "beginCaptures": {
+        "0": {
+          "name": "string.interpolated.begin.doc.unison"
+        }
+      },
+      "endCaptures": {
+        "0": {
+          "name": "string.interpolated.end.doc.unison"
+        }
+      },
+      "patterns": [
+        {
+          "include": "#docheading"
+        },
+        {
+          "include": "#doc_para"
+        }
+      ]
+    },
     "docheading": {
       "begin": "(?:(^|\\G)\\s*)(#{1,6})\\s*(?=[\\S[^#]])",
       "end": "\\s*(#{1,6})?$\\n?",
@@ -118,19 +128,23 @@
       "name": "markup.strikethrough.doc.unison"
     },
     "docmono": {
-      "begin": "''",
-      "end": "''",
+      "begin": "''|(?:[^`])`(?=[^`])",
+      "end": "''|(?:[^`])`(?=[^`])",
       "name": "markup.raw.doc.unison"
     },
     "doclist": {
-      "begin": "^(\\s*)([-+*]|[\\d]+\\.)\\s+",
+      "begin": "^(\\s*)([-+*]|[\\d]+\\.)(?=\\s+)",
       "end": "(?=\\n)",
-      "name": "markup.list, string.doc.unison",
-      "captures": {
+      "beginCaptures": {
         "2": {
-          "name": "markup.punctuation.list.beginning.doc.unison"
+          "name": "punctuation.definition.list.begin.markdown"
         }
-      }
+      },
+      "patterns": [
+        {
+          "include": "#doc_para"
+        }
+      ]
     },
     "docbold": {
       "begin": "\\*+(?=[[^\\s]])",
@@ -147,13 +161,23 @@
       ]
     },
     "doc_inline_example": {
-      "begin": "(?:[^`])``(?=[^`])",
-      "end": "``",
+      "begin": "(?<!`)``(?!`)",
+      "end": "(?<!`)``(?!`)",
       "patterns": [
         {
           "include": "$self"
         }
-      ]
+      ],
+      "beginCaptures": {
+        "0": {
+          "name": "meta.preprocessor.doc.directive.begin.unison"
+        }
+      },
+      "endCaptures": {
+        "0": {
+          "name": "meta.preprocessor.doc.directive.end.unison"
+        }
+      }
     },
     "doceval": {
       "begin": "@eval\\s*{|^\\s*````*|@typecheck\\s*````*",
@@ -175,7 +199,7 @@
       }
     },
     "docref": {
-      "match": "((@source|@signature|@signatures|@foldedSource)\\s*)?({\\s*)((type\\s+)?([\\w\\.'()!@#$%^&*+-]+\\s*(,)\\s*)*[\\w\\.'()!@#$%^&*+-]+(?=\\s*}))(\\s*})",
+      "match": "((@source|@signature|@signatures|@foldedSource)\\s*)?({\\s*)((type\\s+)?([\\w\\.'()!@#$%^/&*+-]+\\s*(,)\\s*)*[\\w\\.'()!@#$%^/&*+-]+(?=\\s*}))(\\s*})",
       "captures": {
         "1": {
           "name": "meta.preprocessor.doc.directive.begin.unison"
@@ -203,9 +227,74 @@
         }
       }
     },
+    "doclink": {
+      "captures": {
+        "1": {
+          "name": "punctuation.definition.link.title.begin.markdown"
+        },
+        "2": {
+          "name": "string.other.link.title.markdown",
+          "patterns": [
+            {
+              "include": "#doc_para"
+            }
+          ]
+        },
+        "4": {
+          "name": "punctuation.definition.link.title.end.markdown"
+        },
+        "5": {
+          "name": "punctuation.definition.metadata.markdown"
+        },
+        "7": {
+          "name": "punctuation.definition.link.markdown"
+        },
+        "8": {
+          "name": "markup.underline.link.markdown"
+        },
+        "9": {
+          "name": "punctuation.definition.link.markdown"
+        },
+        "10": {
+          "name": "markup.underline.link.markdown"
+        },
+        "12": {
+          "name": "string.other.link.description.title.markdown"
+        },
+        "13": {
+          "name": "punctuation.definition.string.begin.markdown"
+        },
+        "14": {
+          "name": "punctuation.definition.string.end.markdown"
+        },
+        "15": {
+          "name": "string.other.link.description.title.markdown"
+        },
+        "16": {
+          "name": "punctuation.definition.string.begin.markdown"
+        },
+        "17": {
+          "name": "punctuation.definition.string.end.markdown"
+        },
+        "18": {
+          "name": "string.other.link.description.title.markdown"
+        },
+        "19": {
+          "name": "punctuation.definition.string.begin.markdown"
+        },
+        "20": {
+          "name": "punctuation.definition.string.end.markdown"
+        },
+        "21": {
+          "name": "punctuation.definition.metadata.markdown"
+        }
+      },
+      "match": "(?x)\n  (\\[)((?<square>[^\\[\\]\\\\]|\\\\.|\\[\\g<square>*+\\])*+)(\\])\n                # Match the link text.\n  (\\()            # Opening paren for url\n    # The url\n      [ \\t]*\n      (\n         (<)((?:\\\\[<>]|[^<>\\n])*)(>)\n         | ((?<url>(?>[^\\s()]+)|\\(\\g<url>*\\))*)\n      )\n      [ \\t]*\n    # The title  \n    (?:\n        ((\\()[^()]*(\\)))    # Match title in parens…\n      | ((\")[^\"]*(\"))    # or in double quotes…\n      | ((')[^']*('))    # or in single quotes.\n    )?            # Title is optional\n    \\s*            # Optional whitespace\n  (\\))\n",
+      "name": "meta.link.inline.markdown"
+    },
     "annotation": {
       "name": "meta.function.type-declaration.unison",
-      "match": "([^\\r\\n\\t\\f\\v \"]+)\\s*(:)(?=\\s)",
+      "match": "([^\\r\\n\\t\\f\\v \"`]+)\\s*(:)(?=\\s)",
       "captures": {
         "1": {
           "name": "entity.name.function.unison"
@@ -300,7 +389,7 @@
       ]
     },
     "control": {
-      "match": "\\b(if|then|else|and|or)\\b",
+      "match": "\\b(if|then|else)\\b",
       "captures": {
         "1": {
           "name": "keyword.control.unison"
@@ -318,17 +407,17 @@
       ]
     },
     "float": {
-      "match": "([^+\\-\\w\\d]|^)([+-]?\\d+\\.\\d*)",
+      "match": "((?<=^|[^\\w+-])[+-]?\\d+\\.\\d*\\b)",
       "captures": {
-        "2": {
+        "0": {
           "name": "constant.numeric.decimal.unison"
         }
       }
     },
     "int": {
-      "match": "([^\\w\\d]|^)([+-]?\\d+\\b)",
+      "match": "(?<=^|[^\\w+-])([+-]?(\\d+\\b|0x[0-9a-fA-F]+\\b))",
       "captures": {
-        "2": {
+        "1": {
           "name": "constant.numeric.integer.unison"
         }
       }
