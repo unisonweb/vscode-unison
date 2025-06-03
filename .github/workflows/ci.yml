@@ -25,6 +25,7 @@ jobs:
           name: unison-${{ github.sha }}.vsix
           path: unison.vsix
   publish-gh:
+    if: github.event_name == 'release'
     name: Publish to GitHub
     needs: build
     runs-on: ubuntu-latest
@@ -36,12 +37,12 @@ jobs:
           path: unison.vsix
       - env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        if: github.event_name == 'release'
         uses: svenstaro/upload-release-action@v2
         with:
           asset_name: unison-${{ github.event.release.tag_name }}.vsix
           file: unison.vsix
   publish-vsc:
+    if: github.event_name == 'release'
     name: Publish to Visual Studio Code Marketplace
     needs: build
     runs-on: ubuntu-latest
@@ -51,9 +52,9 @@ jobs:
         with:
           name: unison-${{ github.sha }}.vsix
           path: unison.vsix
-      - if: github.event_name == 'release'
-        run: npx vsce publish --packagePath unison.vsix --pat "${{ secrets.AZURE_PAT }}"
+      - run: npx vsce publish --packagePath unison.vsix --pat "${{ secrets.AZURE_PAT }}"
   publish-ovsx:
+    if: github.event_name == 'release'
     name: Publish to Open VSX
     needs: build
     runs-on: ubuntu-latest
@@ -63,5 +64,4 @@ jobs:
         with:
           name: unison-${{ github.sha }}.vsix
           path: unison.vsix
-      - if: github.event_name == 'release'
-        run: npx ovsx publish --packagePath unison.vsix --pat "${{ secrets.OVSX_PAT }}"
+      - run: npx ovsx publish --packagePath unison.vsix --pat "${{ secrets.OVSX_PAT }}"
