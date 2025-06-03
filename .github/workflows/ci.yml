@@ -1,4 +1,4 @@
-name: Workflow
+name: CI
 on:
   pull_request:
     branches:
@@ -23,14 +23,52 @@ jobs:
         with:
           name: unison-${{ github.sha }}.vsix
           path: unison.vsix
+  release-github:
+    if: github.event_name == 'release'
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: actions/download-artifact@v4
+        with:
+          name: unison-${{ github.sha }}.vsix
+          path: unison.vsix
       - env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        if: github.event_name == 'release'
         uses: svenstaro/upload-release-action@v2
         with:
           asset_name: unison-${{ github.event.release.tag_name }}.vsix
           file: unison.vsix
+  release-vscode:
+    if: github.event_name == 'release'
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: actions/download-artifact@v4
+        with:
+          name: unison-${{ github.sha }}.vsix
+          path: unison.vsix
       - if: github.event_name == 'release'
         run: npx vsce publish --packagePath unison.vsix --pat "${{ secrets.AZURE_PAT }}"
+  release-openvsx:
+    if: github.event_name == 'release'
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: actions/download-artifact@v4
+        with:
+          name: unison-${{ github.sha }}.vsix
+          path: unison.vsix
       - if: github.event_name == 'release'
         run: npx ovsx publish --packagePath unison.vsix --pat "${{ secrets.OVSX_PAT }}"
