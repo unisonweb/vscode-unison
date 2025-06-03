@@ -11,6 +11,7 @@ on:
       - created
 jobs:
   build:
+    name: Build
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -23,7 +24,8 @@ jobs:
         with:
           name: unison-${{ github.sha }}.vsix
           path: unison.vsix
-  release-github:
+  publish-gh:
+    name: Publish to GitHub
     needs: build
     runs-on: ubuntu-latest
     steps:
@@ -39,7 +41,8 @@ jobs:
         with:
           asset_name: unison-${{ github.event.release.tag_name }}.vsix
           file: unison.vsix
-  release-vscode:
+  publish-vsc:
+    name: Publish to Visual Studio Code Marketplace
     needs: build
     runs-on: ubuntu-latest
     steps:
@@ -50,7 +53,8 @@ jobs:
           path: unison.vsix
       - if: github.event_name == 'release'
         run: npx vsce publish --packagePath unison.vsix --pat "${{ secrets.AZURE_PAT }}"
-  release-openvsx:
+  publish-ovsx:
+    name: Publish to Open VSX
     needs: build
     runs-on: ubuntu-latest
     steps:
