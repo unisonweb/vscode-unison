@@ -1,0 +1,67 @@
+name: CI
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+  release:
+    types:
+      - created
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install
+      - run: npx vsce package --out unison.vsix
+      - uses: actions/upload-artifact@v4
+        with:
+          name: unison-${{ github.sha }}.vsix
+          path: unison.vsix
+  publish-gh:
+    if: github.event_name == 'release'
+    name: Publish to GitHub
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: unison-${{ github.sha }}.vsix
+          path: unison.vsix
+      - env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        uses: svenstaro/upload-release-action@v2
+        with:
+          asset_name: unison-${{ github.event.release.tag_name }}.vsix
+          file: unison.vsix
+  publish-vsc:
+    if: github.event_name == 'release'
+    name: Publish to Visual Studio Code Marketplace
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: unison-${{ github.sha }}.vsix
+          path: unison.vsix
+      - run: npx vsce publish --packagePath unison.vsix --pat "${{ secrets.AZURE_PAT }}"
+  publish-ovsx:
+    if: github.event_name == 'release'
+    name: Publish to Open VSX
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: unison-${{ github.sha }}.vsix
+          path: unison.vsix
+      - run: npx ovsx publish --packagePath unison.vsix --pat "${{ secrets.OVSX_PAT }}"
