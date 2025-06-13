@@ -14,7 +14,10 @@ This plugin requires the [**UCM** (Unison Codebase Manager)](https://github.com/
 
 ## Installing
 
-Install from the [VSCode Marketplace](https://marketplace.visualstudio.com/items?itemName=unison-lang.unison)
+Follow the instructions in your editor to install from either:
+
+* [VSCode Marketplace](https://marketplace.visualstudio.com/items?itemName=unison-lang.unison)
+* [Open VSX](https://open-vsx.org/extension/unison-lang/unison)
 
 ## Extension Settings
 
@@ -38,13 +41,11 @@ See the [CHANGELOG](./CHANGELOG.md) for updates.
 * Open the project in VS Code: `code .`
 * Press F5 to load the extension into the VS Code extension host.
 
-## Deploying
+## Publishing new versions
 
-Follow [this guide](https://code.visualstudio.com/api/working-with-extensions/publishing-extension) to get your account set up, contact @ChrisPenner to get access to the `unison-lang` [publisher](https://dev.azure.com/unison-lang).
+1. Update the version in `package.json`.
+2. Commit the changes, and tag the commit, e.g. `git tag 1.2.1 <sha>`
+3. Push the changes and the tag to GitHub, e.g. `git push --tags`
+4. Create a new release on GitHub for that tag
+5. Github Actions will build and publish the extension to [Open VSX](https://open-vsx.org/extension/unison-lang/unison) and the [VSCode Marketplace](https://marketplace.visualstudio.com/items?itemName=unison-lang.unison).
 
-Then:
-
-```sh
-$ vsce login unison-lang
-$ npm run publish
-```
