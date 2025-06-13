@@ -51,8 +51,8 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           name: unison-${{ github.sha }}.vsix
-          path: unison.vsix
-      - run: npx vsce publish --packagePath unison.vsix --pat "${{ secrets.AZURE_PAT }}"
+      - run: |
+          npx vsce publish --packagePath unison.vsix --pat "${{ secrets.AZURE_PAT }}"
   publish-ovsx:
     if: github.event_name == 'release'
     name: Publish to Open VSX
@@ -63,5 +63,5 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           name: unison-${{ github.sha }}.vsix
-          path: unison.vsix
-      - run: npx ovsx publish --packagePath unison.vsix --pat "${{ secrets.OVSX_PAT }}"
+      - run: |
+          npx ovsx publish --packagePath unison.vsix --pat "${{ secrets.OVSX_PAT }}"
