@@ -1,0 +1,44 @@
+{
+    "scopeName": "markdown.unison.codeblock",
+    "injectionSelector": "L:text.html.markdown",
+    "patterns": [
+        {
+            "include": "#unison-code-block"
+        }
+    ],
+    "repository": {
+        "unison-code-block": {
+            "begin": "(^|\\G)(\\s*)(\\`{3,}|~{3,})\\s*(?i:(unison)(\\s+[^`~]*)?$)",
+            "name": "markup.fenced.block.markdown",
+            "end": "(^|\\G)(\\2|\\s{0,3})(\\3)\\s*$",
+            "beginCaptures": {
+                "3": {
+                    "name": "punctuation.definition.markdown"
+                },
+                "4": {
+                    "name": "fenced.block.language.markdown"
+                },
+                "5": {
+                    "name": "fenced.block.language.attributes.markdown"
+                }
+            },
+            "endCaptures": {
+                "3": {
+                    "name": "punctuation.definition.markdown"
+                }
+            },
+            "patterns": [
+                {
+                    "begin": "(^|\\G)(\\s*)(.*)",
+                    "while": "(^|\\G)(?!\\s*([`~]{3,})\\s*$)",
+                    "contentName": "meta.embedded.block.unison",
+                    "patterns": [
+                        {
+                            "include": "source.u"
+                        }
+                    ]
+                }
+            ]
+        }
+    }
+}

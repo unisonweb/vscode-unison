@@ -45,6 +45,14 @@
                 "language": "unison",
                 "scopeName": "source.u",
                 "path": "./syntaxes/unison.tmLanguage.json"
+            },
+            {
+                "path": "./syntaxes/unison-markdown-injection.tmLanguage.json",
+                "scopeName": "markdown.unison.codeblock",
+                "injectTo": ["text.html.markdown"],
+                "embeddedLanguages": {
+                    "meta.embedded.unison": "unison"
+                }
             }
         ],
         "configuration": {
