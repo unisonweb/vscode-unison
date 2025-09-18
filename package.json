@@ -3,7 +3,7 @@
     "displayName": "Unison Language",
     "publisher": "unison-lang",
     "description": "Official extension for unison language support",
-    "version": "1.4.0",
+    "version": "1.4.1",
     "icon": "images/unison.png",
     "main": "./out/main.js",
     "engines": {
@@ -37,6 +37,10 @@
                     ".u",
                     ".uu"
                 ],
+                "icon": {
+                  "light": "./icons/unison-light-mode.svg",
+                  "dark": "./icons/unison-dark-mode.svg"
+                },
                 "configuration": "./language-configuration.json"
             }
         ],
@@ -55,13 +59,6 @@
                 "embeddedLanguages": {
                     "meta.embedded.unison": "unison"
                 }
-            }
-        ],
-        "iconThemes": [
-            {
-                "id": "unison-icons",
-                "label": "Unison Icons",
-                "path": "./icons/unison-file-icons.json"
             }
         ],
         "configuration": {
