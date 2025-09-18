@@ -1,0 +1,11 @@
+{
+    "iconDefinitions": {
+        "unison": {
+            "iconPath": "./unison.svg"
+        }
+    },
+    "fileExtensions": {
+        "u": "unison",
+        "uu": "unison"
+    }
+}

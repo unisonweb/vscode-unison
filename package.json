@@ -49,10 +49,19 @@
             {
                 "path": "./syntaxes/unison-markdown-injection.tmLanguage.json",
                 "scopeName": "markdown.unison.codeblock",
-                "injectTo": ["text.html.markdown"],
+                "injectTo": [
+                    "text.html.markdown"
+                ],
                 "embeddedLanguages": {
                     "meta.embedded.unison": "unison"
                 }
+            }
+        ],
+        "iconThemes": [
+            {
+                "id": "unison-icons",
+                "label": "Unison Icons",
+                "path": "./icons/unison-file-icons.json"
             }
         ],
         "configuration": {
