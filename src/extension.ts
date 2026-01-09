@@ -127,9 +127,14 @@ async function openInShare() {
   }
 
   const symbolName = document.getText(wordRange);
+  
+  // Get the location (line and column) - VS Code uses 0-based indexing
+  const line = wordRange.start.line + 1; // Convert to 1-based
+  const column = wordRange.start.character + 1; // Convert to 1-based
+  const loc = `${line}:${column}`;
 
   // Construct the URL with query parameters
-  const url = `http://localhost:5424/open-on-share?fqn=${encodeURIComponent(symbolName)}&fileURI=${encodeURIComponent(fileUri)}`;
+  const url = `http://localhost:5424/open-on-share?fqn=${encodeURIComponent(symbolName)}&fileURI=${encodeURIComponent(fileUri)}&loc=${encodeURIComponent(loc)}`;
 
   log(`Opening in Share: ${url}`);
 
