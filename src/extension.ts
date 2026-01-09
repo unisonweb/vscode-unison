@@ -1,7 +1,12 @@
-import { workspace, window, WorkspaceFolder, OutputChannel, commands, Uri, Range, Position } from "vscode";
+import {
+  workspace,
+  window,
+  WorkspaceFolder,
+  OutputChannel,
+  commands,
+} from "vscode";
 import { LanguageClient } from "vscode-languageclient/node";
 import { connect } from "node:net";
-import { request } from "node:http";
 
 const outputChannel: OutputChannel = window.createOutputChannel("Unison");
 const clients: Map<string, LanguageClient> = new Map();
@@ -20,8 +25,8 @@ exports.activate = function () {
     removed.forEach((folder) => removeWorkspaceFolder(folder));
   });
 
-  // Register "Open in Share" command
-  commands.registerCommand('unison.openInShare', openInShare);
+  // Register "Open on Share" command
+  commands.registerCommand("unison.openOnShare", openOnShare);
 };
 
 exports.deactivate = async function () {
@@ -68,7 +73,7 @@ async function connectToServer() {
       log(`Trying to connect to ucm lsp server at ${host}:${port}`);
       let socket = connect({ port, host: "127.0.0.1" });
       await new Promise((resolve, reject) =>
-        socket.once("connect", resolve).once("error", reject)
+        socket.once("connect", resolve).once("error", reject),
       );
 
       shouldOpenTerminal = false;
@@ -99,7 +104,7 @@ async function connectToServer() {
       } else if (!haveShownError) {
         haveShownError = true;
         window.showErrorMessage(
-          `Unison: ${errMsg}, is there a UCM running? (version M4a or later)`
+          `Unison: ${errMsg}, is there a UCM running? (version M4a or later)`,
         );
       }
       await sleep(2000);
@@ -108,71 +113,46 @@ async function connectToServer() {
   }
 }
 
-async function openInShare() {
+async function openOnShare() {
   const editor = window.activeTextEditor;
   if (!editor) {
-    window.showErrorMessage('No active editor found');
+    window.showErrorMessage("No active editor found");
     return;
   }
 
   const document = editor.document;
   const position = editor.selection.active;
-  const fileUri = document.uri.toString();
 
-  // Get the symbol at the current position
-  const wordRange = document.getWordRangeAtPosition(position);
-  if (!wordRange) {
-    window.showErrorMessage('No symbol found at cursor position');
+  // Get the LSP client for this workspace
+  const workspaceFolder = workspace.getWorkspaceFolder(document.uri);
+  if (!workspaceFolder) {
+    window.showErrorMessage("File is not in a workspace");
     return;
   }
 
-  const symbolName = document.getText(wordRange);
-  
-  // Get the location (line and column) - VS Code uses 0-based indexing
-  const line = wordRange.start.line + 1; // Convert to 1-based
-  const column = wordRange.start.character + 1; // Convert to 1-based
-  const loc = `${line}:${column}`;
+  const client = clients.get(workspaceFolder.uri.fsPath);
+  if (!client) {
+    window.showErrorMessage("Unison language server not connected");
+    return;
+  }
 
-  // Construct the URL with query parameters
-  const url = `http://localhost:5424/open-on-share?fqn=${encodeURIComponent(symbolName)}&fileURI=${encodeURIComponent(fileUri)}&loc=${encodeURIComponent(loc)}`;
-
-  log(`Opening in Share: ${url}`);
-
-  // Make HTTP POST request
   try {
-    await makeHttpPost(url);
-    window.showInformationMessage(`Opened "${symbolName}" in Share`);
+    log(
+      `Sending unison/openOnShare request for ${document.uri.toString()} at ${position.line}:${position.character}`,
+    );
+
+    // Send custom LSP request to the Unison server
+    await client.sendRequest("unison/openOnShare", {
+      textDocument: { uri: document.uri.toString() },
+      position: {
+        line: position.line,
+        character: position.character,
+      },
+    });
+
+    window.showInformationMessage("Opened in Share");
   } catch (error) {
-    window.showErrorMessage(`Failed to open in Share: ${error}`);
+    window.showErrorMessage(`Failed to open on Share: ${error}`);
     log(`Error opening in Share: ${error}`);
   }
-}
-
-function makeHttpPost(url: string): Promise<void> {
-  return new Promise((resolve, reject) => {
-    const parsedUrl = new URL(url);
-    const options = {
-      hostname: parsedUrl.hostname,
-      port: parsedUrl.port,
-      path: parsedUrl.pathname + parsedUrl.search,
-      method: 'POST',
-      headers: {
-        'Content-Length': '0'
-      }
-    };
-
-    const req = request(options, (res) => {
-      if (res.statusCode && res.statusCode >= 200 && res.statusCode < 300) {
-        resolve();
-      } else {
-        reject(new Error(`HTTP ${res.statusCode}: ${res.statusMessage}`));
-      }
-    });
-
-    req.on('error', (error) => {
-      reject(error);
-    });
-
-    req.end();
-  });
 }
