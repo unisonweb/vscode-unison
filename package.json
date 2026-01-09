@@ -24,6 +24,21 @@
     ],
     "author": "Unison Computing",
     "contributes": {
+        "commands": [
+            {
+                "command": "unison.openInShare",
+                "title": "Open in Share"
+            }
+        ],
+        "menus": {
+            "editor/context": [
+                {
+                    "command": "unison.openInShare",
+                    "when": "editorLangId == unison",
+                    "group": "navigation"
+                }
+            ]
+        },
         "languages": [
             {
                 "id": "unison",
@@ -38,8 +53,8 @@
                     ".uu"
                 ],
                 "icon": {
-                  "light": "./icons/unison-light-mode.svg",
-                  "dark": "./icons/unison-dark-mode.svg"
+                    "light": "./icons/unison-light-mode.svg",
+                    "dark": "./icons/unison-dark-mode.svg"
                 },
                 "configuration": "./language-configuration.json"
             }

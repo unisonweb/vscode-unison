@@ -1,6 +1,7 @@
-import { workspace, window, WorkspaceFolder, OutputChannel } from "vscode";
+import { workspace, window, WorkspaceFolder, OutputChannel, commands, Uri, Range, Position } from "vscode";
 import { LanguageClient } from "vscode-languageclient/node";
 import { connect } from "node:net";
+import { request } from "node:http";
 
 const outputChannel: OutputChannel = window.createOutputChannel("Unison");
 const clients: Map<string, LanguageClient> = new Map();
@@ -18,6 +19,9 @@ exports.activate = function () {
     added.forEach((folder) => addWorkspaceFolder(folder));
     removed.forEach((folder) => removeWorkspaceFolder(folder));
   });
+
+  // Register "Open in Share" command
+  commands.registerCommand('unison.openInShare', openInShare);
 };
 
 exports.deactivate = async function () {
@@ -102,4 +106,68 @@ async function connectToServer() {
       continue;
     }
   }
+}
+
+async function openInShare() {
+  const editor = window.activeTextEditor;
+  if (!editor) {
+    window.showErrorMessage('No active editor found');
+    return;
+  }
+
+  const document = editor.document;
+  const position = editor.selection.active;
+  const fileUri = document.uri.toString();
+
+  // Get the symbol at the current position
+  const wordRange = document.getWordRangeAtPosition(position);
+  if (!wordRange) {
+    window.showErrorMessage('No symbol found at cursor position');
+    return;
+  }
+
+  const symbolName = document.getText(wordRange);
+
+  // Construct the URL with query parameters
+  const url = `http://localhost:5424/open-on-share?fqn=${encodeURIComponent(symbolName)}&fileURI=${encodeURIComponent(fileUri)}`;
+
+  log(`Opening in Share: ${url}`);
+
+  // Make HTTP POST request
+  try {
+    await makeHttpPost(url);
+    window.showInformationMessage(`Opened "${symbolName}" in Share`);
+  } catch (error) {
+    window.showErrorMessage(`Failed to open in Share: ${error}`);
+    log(`Error opening in Share: ${error}`);
+  }
+}
+
+function makeHttpPost(url: string): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const parsedUrl = new URL(url);
+    const options = {
+      hostname: parsedUrl.hostname,
+      port: parsedUrl.port,
+      path: parsedUrl.pathname + parsedUrl.search,
+      method: 'POST',
+      headers: {
+        'Content-Length': '0'
+      }
+    };
+
+    const req = request(options, (res) => {
+      if (res.statusCode && res.statusCode >= 200 && res.statusCode < 300) {
+        resolve();
+      } else {
+        reject(new Error(`HTTP ${res.statusCode}: ${res.statusMessage}`));
+      }
+    });
+
+    req.on('error', (error) => {
+      reject(error);
+    });
+
+    req.end();
+  });
 }
