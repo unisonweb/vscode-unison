@@ -142,7 +142,7 @@ async function openOnShare() {
     );
 
     // Send custom LSP request to the Unison server
-    await client.sendRequest("unison/openOnShare", {
+    const response = await client.sendRequest("unison/openOnShare", {
       textDocument: { uri: document.uri.toString() },
       position: {
         line: position.line,
@@ -150,9 +150,17 @@ async function openOnShare() {
       },
     });
 
-    window.showInformationMessage("Opened in Share");
+    // Check if the response has an error
+    if (response && typeof response === "object" && "error" in response) {
+      const errorMessage = (response as { error: string | null }).error;
+      if (errorMessage) {
+        window.showErrorMessage(errorMessage);
+      } else {
+        window.showInformationMessage("Opened on Share");
+      }
+    }
   } catch (error) {
     window.showErrorMessage(`Failed to open on Share: ${error}`);
-    log(`Error opening in Share: ${error}`);
+    log(`Error opening on Share: ${error}`);
   }
 }

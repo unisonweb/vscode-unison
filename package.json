@@ -26,14 +26,14 @@
     "contributes": {
         "commands": [
             {
-                "command": "unison.openInShare",
-                "title": "Open in Share"
+                "command": "unison.openOnShare",
+                "title": "Open on Share"
             }
         ],
         "menus": {
             "editor/context": [
                 {
-                    "command": "unison.openInShare",
+                    "command": "unison.openOnShare",
                     "when": "editorLangId == unison",
                     "group": "navigation"
                 }
