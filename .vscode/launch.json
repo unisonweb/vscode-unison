@@ -3,7 +3,8 @@
     "configurations": [
       {
         "args": [
-          "--extensionDevelopmentPath=${workspaceFolder}"
+          "--extensionDevelopmentPath=${workspaceFolder}",
+          "${workspaceFolder}"
         ],
         "name": "Test Extension",
         "outFiles": [

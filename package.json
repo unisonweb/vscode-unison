@@ -124,6 +124,19 @@
             }
         ],
         "menus": {
+            "commandPalette": [
+                {
+                    "command": "unison.editDefinition",
+                    "when": "false"
+                }
+            ],
+            "editor/context": [
+                {
+                    "command": "unison.editDefinition",
+                    "when": "editorLangId == unison",
+                    "group": "navigation"
+                }
+            ],
             "view/title": [
                 {
                     "command": "unison.refreshCodebase",
