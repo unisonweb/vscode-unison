@@ -38,8 +38,8 @@
                     ".uu"
                 ],
                 "icon": {
-                  "light": "./icons/unison-light-mode.svg",
-                  "dark": "./icons/unison-dark-mode.svg"
+                    "light": "./icons/unison-light-mode.svg",
+                    "dark": "./icons/unison-dark-mode.svg"
                 },
                 "configuration": "./language-configuration.json"
             }
@@ -93,8 +93,44 @@
                     "type": "string",
                     "default": "ucm",
                     "description": "Which command to run when automatically opening ucm in a terminal."
+                },
+                "unison.codebaseApiUrl": {
+                    "scope": "window",
+                    "type": "string",
+                    "default": "http://127.0.0.1:5858/codebase/api",
+                    "description": "The base URL for the Unison Codebase Manager API."
                 }
             }
+        },
+        "views": {
+            "explorer": [
+                {
+                    "id": "unisonCodebase",
+                    "name": "Unison Codebase",
+                    "icon": "images/unison.png",
+                    "contextualTitle": "Unison Codebase"
+                }
+            ]
+        },
+        "commands": [
+            {
+                "command": "unison.refreshCodebase",
+                "title": "Refresh Unison Codebase",
+                "icon": "$(refresh)"
+            },
+            {
+                "command": "unison.editDefinition",
+                "title": "Edit Definition"
+            }
+        ],
+        "menus": {
+            "view/title": [
+                {
+                    "command": "unison.refreshCodebase",
+                    "when": "view == unisonCodebase",
+                    "group": "navigation"
+                }
+            ]
         }
     },
     "repository": {

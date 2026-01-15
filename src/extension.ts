@@ -1,6 +1,7 @@
-import { workspace, window, WorkspaceFolder, OutputChannel } from "vscode";
+import { workspace, window, WorkspaceFolder, OutputChannel, commands, ExtensionContext } from "vscode";
 import { LanguageClient } from "vscode-languageclient/node";
 import { connect } from "node:net";
+import { UnisonTreeProvider } from "./unisonTreeProvider";
 
 const outputChannel: OutputChannel = window.createOutputChannel("Unison");
 const clients: Map<string, LanguageClient> = new Map();
@@ -12,7 +13,39 @@ function log(msg: string) {
   outputChannel.appendLine(msg);
 }
 
-exports.activate = function () {
+exports.activate = function (context: ExtensionContext) {
+  // Register the tree view
+  const apiBaseUrl = workspace.getConfiguration("unison").codebaseApiUrl || "http://127.0.0.1:5858/codebase/api";
+  const treeProvider = new UnisonTreeProvider(apiBaseUrl);
+  const treeView = window.createTreeView("unisonCodebase", {
+    treeDataProvider: treeProvider,
+  });
+  context.subscriptions.push(treeView);
+
+  // Register the refresh command
+  context.subscriptions.push(
+    commands.registerCommand("unison.refreshCodebase", () => {
+      treeProvider.refresh();
+    })
+  );
+
+  // Register the edit definition command
+  context.subscriptions.push(
+    commands.registerCommand("unison.editDefinition", async (fqn: string) => {
+      // Get the active language client
+      const activeClient = getActiveLanguageClient();
+      if (activeClient) {
+        try {
+          await activeClient.sendRequest("unison/edit", { fqn });
+        } catch (error) {
+          window.showErrorMessage(`Failed to edit definition: ${error}`);
+        }
+      } else {
+        window.showWarningMessage("No active Unison language server connection");
+      }
+    })
+  );
+
   workspace.workspaceFolders?.forEach((folder) => addWorkspaceFolder(folder));
   workspace.onDidChangeWorkspaceFolders(({ added, removed }) => {
     added.forEach((folder) => addWorkspaceFolder(folder));
@@ -47,6 +80,27 @@ async function removeWorkspaceFolder(workspaceFolder: WorkspaceFolder) {
     clients.delete(folderPath);
     await client.stop();
   }
+}
+
+function getActiveLanguageClient(): LanguageClient | undefined {
+  // Return the first available client or the one for the active workspace
+  if (clients.size === 0) {
+    return undefined;
+  }
+
+  const activeEditor = window.activeTextEditor;
+  if (activeEditor) {
+    const workspaceFolder = workspace.getWorkspaceFolder(activeEditor.document.uri);
+    if (workspaceFolder) {
+      const client = clients.get(workspaceFolder.uri.fsPath);
+      if (client) {
+        return client;
+      }
+    }
+  }
+
+  // Return the first available client
+  return clients.values().next().value;
 }
 
 async function sleep(ms: number): Promise<void> {
