@@ -24,6 +24,21 @@
     ],
     "author": "Unison Computing",
     "contributes": {
+        "commands": [
+            {
+                "command": "unison.openOnShare",
+                "title": "Open on Share"
+            }
+        ],
+        "menus": {
+            "editor/context": [
+                {
+                    "command": "unison.openOnShare",
+                    "when": "editorLangId == unison",
+                    "group": "navigation"
+                }
+            ]
+        },
         "languages": [
             {
                 "id": "unison",

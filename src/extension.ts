@@ -1,4 +1,11 @@
-import { workspace, window, WorkspaceFolder, OutputChannel, commands, ExtensionContext } from "vscode";
+import {
+  workspace,
+  window,
+  WorkspaceFolder,
+  OutputChannel,
+  commands,
+  ExtensionContext,
+} from "vscode";
 import { LanguageClient } from "vscode-languageclient/node";
 import { connect } from "node:net";
 import { UnisonTreeProvider } from "./unisonTreeProvider";
@@ -15,7 +22,9 @@ function log(msg: string) {
 
 exports.activate = function (context: ExtensionContext) {
   // Register the tree view
-  const apiBaseUrl = workspace.getConfiguration("unison").codebaseApiUrl || "http://127.0.0.1:5858/codebase/api";
+  const apiBaseUrl =
+    workspace.getConfiguration("unison").codebaseApiUrl ||
+    "http://127.0.0.1:5858/codebase/api";
   const treeProvider = new UnisonTreeProvider(apiBaseUrl);
   const treeView = window.createTreeView("unisonCodebase", {
     treeDataProvider: treeProvider,
@@ -26,7 +35,7 @@ exports.activate = function (context: ExtensionContext) {
   context.subscriptions.push(
     commands.registerCommand("unison.refreshCodebase", () => {
       treeProvider.refresh();
-    })
+    }),
   );
 
   // Register the edit definition command
@@ -41,9 +50,11 @@ exports.activate = function (context: ExtensionContext) {
           window.showErrorMessage(`Failed to edit definition: ${error}`);
         }
       } else {
-        window.showWarningMessage("No active Unison language server connection");
+        window.showWarningMessage(
+          "No active Unison language server connection",
+        );
       }
-    })
+    }),
   );
 
   workspace.workspaceFolders?.forEach((folder) => addWorkspaceFolder(folder));
@@ -51,6 +62,9 @@ exports.activate = function (context: ExtensionContext) {
     added.forEach((folder) => addWorkspaceFolder(folder));
     removed.forEach((folder) => removeWorkspaceFolder(folder));
   });
+
+  // Register "Open on Share" command
+  commands.registerCommand("unison.openOnShare", openOnShare);
 };
 
 exports.deactivate = async function () {
@@ -90,7 +104,9 @@ function getActiveLanguageClient(): LanguageClient | undefined {
 
   const activeEditor = window.activeTextEditor;
   if (activeEditor) {
-    const workspaceFolder = workspace.getWorkspaceFolder(activeEditor.document.uri);
+    const workspaceFolder = workspace.getWorkspaceFolder(
+      activeEditor.document.uri,
+    );
     if (workspaceFolder) {
       const client = clients.get(workspaceFolder.uri.fsPath);
       if (client) {
@@ -118,7 +134,7 @@ async function connectToServer() {
       log(`Trying to connect to ucm lsp server at ${host}:${port}`);
       let socket = connect({ port, host: "127.0.0.1" });
       await new Promise((resolve, reject) =>
-        socket.once("connect", resolve).once("error", reject)
+        socket.once("connect", resolve).once("error", reject),
       );
 
       shouldOpenTerminal = false;
@@ -149,11 +165,63 @@ async function connectToServer() {
       } else if (!haveShownError) {
         haveShownError = true;
         window.showErrorMessage(
-          `Unison: ${errMsg}, is there a UCM running? (version M4a or later)`
+          `Unison: ${errMsg}, is there a UCM running? (version M4a or later)`,
         );
       }
       await sleep(2000);
       continue;
     }
+  }
+}
+
+async function openOnShare() {
+  const editor = window.activeTextEditor;
+  if (!editor) {
+    window.showErrorMessage("No active editor found");
+    return;
+  }
+
+  const document = editor.document;
+  const position = editor.selection.active;
+
+  // Get the LSP client for this workspace
+  const workspaceFolder = workspace.getWorkspaceFolder(document.uri);
+  if (!workspaceFolder) {
+    window.showErrorMessage("File is not in a workspace");
+    return;
+  }
+
+  const client = clients.get(workspaceFolder.uri.fsPath);
+  if (!client) {
+    window.showErrorMessage("Unison language server not connected");
+    return;
+  }
+
+  try {
+    log(
+      `Sending unison/openOnShare request for ${document.uri.toString()} at ${position.line}:${position.character}`,
+    );
+
+    // Send custom LSP request to the Unison server
+    const response = await client.sendRequest("unison/openOnShare", {
+      textDocument: { uri: document.uri.toString() },
+      position: {
+        line: position.line,
+        character: position.character,
+      },
+    });
+
+    // Check if the response has an error
+    if (response && typeof response === "object" && "error" in response) {
+      const errorMessage = (response as { error: string | null }).error;
+      if (errorMessage) {
+        window.showErrorMessage(errorMessage);
+      } else {
+        window.showInformationMessage("Opened on Share");
+      }
+    }
+  } catch (error) {
+    window.showErrorMessage(`Failed to open on Share: ${error}`);
+    log(`Error opening on Share: ${error}`);
   }
 }
