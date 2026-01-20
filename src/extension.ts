@@ -40,21 +40,7 @@ exports.activate = function (context: ExtensionContext) {
 
   // Register the edit definition command
   context.subscriptions.push(
-    commands.registerCommand("unison.editDefinition", async (fqn: string) => {
-      // Get the active language client
-      const activeClient = getActiveLanguageClient();
-      if (activeClient) {
-        try {
-          await activeClient.sendRequest("unison/edit", { fqn });
-        } catch (error) {
-          window.showErrorMessage(`Failed to edit definition: ${error}`);
-        }
-      } else {
-        window.showWarningMessage(
-          "No active Unison language server connection",
-        );
-      }
-    }),
+    commands.registerCommand("unison.editDefinition", editDefinition),
   );
 
   workspace.workspaceFolders?.forEach((folder) => addWorkspaceFolder(folder));
@@ -171,6 +157,78 @@ async function connectToServer() {
       await sleep(2000);
       continue;
     }
+  }
+}
+
+async function editDefinition(fqn?: string) {
+  const editor = window.activeTextEditor;
+  if (!editor) {
+    window.showErrorMessage("No active editor found");
+    return;
+  }
+
+  const document = editor.document;
+
+  // Get the LSP client for this workspace
+  const workspaceFolder = workspace.getWorkspaceFolder(document.uri);
+  if (!workspaceFolder) {
+    window.showErrorMessage("File is not in a workspace");
+    return;
+  }
+
+  const client = clients.get(workspaceFolder.uri.fsPath);
+  if (!client) {
+    window.showErrorMessage("Unison language server not connected");
+    return;
+  }
+
+  try {
+    // If FQN is provided (from tree view), send request with FQN only
+    if (fqn) {
+      log(`Sending editDefinition request for FQN: ${fqn}`);
+
+      const response = await client.sendRequest("editDefinition", {
+        textDocument: { uri: document.uri.toString() },
+        fqn: fqn,
+      });
+
+      // Check if the response has an error
+      if (response && typeof response === "object" && "error" in response) {
+        const errorMessage = (response as { error: string | null }).error;
+        if (errorMessage) {
+          window.showErrorMessage(errorMessage);
+        } else {
+          window.showInformationMessage("Definition edited");
+        }
+      }
+    } else {
+      // If no FQN (from context menu), send request with position
+      const position = editor.selection.active;
+      log(
+        `Sending editDefinition request for ${document.uri.toString()} at ${position.line}:${position.character}`,
+      );
+
+      const response = await client.sendRequest("editDefinition", {
+        textDocument: { uri: document.uri.toString() },
+        position: {
+          line: position.line,
+          character: position.character,
+        },
+      });
+
+      // Check if the response has an error
+      if (response && typeof response === "object" && "error" in response) {
+        const errorMessage = (response as { error: string | null }).error;
+        if (errorMessage) {
+          window.showErrorMessage(errorMessage);
+        } else {
+          window.showInformationMessage("Definition edited");
+        }
+      }
+    }
+  } catch (error) {
+    window.showErrorMessage(`Failed to edit definition: ${error}`);
+    log(`Error editing definition: ${error}`);
   }
 }
 
