@@ -82,29 +82,6 @@ async function removeWorkspaceFolder(workspaceFolder: WorkspaceFolder) {
   }
 }
 
-function getActiveLanguageClient(): LanguageClient | undefined {
-  // Return the first available client or the one for the active workspace
-  if (clients.size === 0) {
-    return undefined;
-  }
-
-  const activeEditor = window.activeTextEditor;
-  if (activeEditor) {
-    const workspaceFolder = workspace.getWorkspaceFolder(
-      activeEditor.document.uri,
-    );
-    if (workspaceFolder) {
-      const client = clients.get(workspaceFolder.uri.fsPath);
-      if (client) {
-        return client;
-      }
-    }
-  }
-
-  // Return the first available client
-  return clients.values().next().value;
-}
-
 async function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
@@ -182,51 +159,35 @@ async function editDefinition(fqn?: string) {
     return;
   }
 
+  const position = editor.selection.active;
+
+  let request;
+  if (fqn) {
+    request = {
+      textDocument: { uri: document.uri.toString() },
+      fqn: fqn,
+    };
+  } else {
+    // If no FQN, send request with the current cursor position
+    request = {
+      textDocument: { uri: document.uri.toString() },
+      position: {
+        line: position.line,
+        character: position.character,
+      },
+    };
+  }
+
   try {
-    // If FQN is provided (from tree view), send request with FQN only
-    if (fqn) {
-      log(`Sending editDefinition request for FQN: ${fqn}`);
+    const response = await client.sendRequest("unison/editDefinition", request);
 
-      const response = await client.sendRequest("unison/editDefinition", {
-        textDocument: { uri: document.uri.toString() },
-        fqn: fqn,
-      });
-      log(`Received response: ${JSON.stringify(response)}`);
-
-      // Check if the response has an error
-      if (response && typeof response === "object" && "error" in response) {
-        const errorMessage = (response as { error: string | null }).error;
-        if (errorMessage) {
-          window.showErrorMessage(errorMessage);
-        } else {
-          window.showInformationMessage("Definition edited");
-        }
-      }
-    } else {
-      // If no FQN (from context menu), send request with position
-      const position = editor.selection.active;
-      log(
-        `Sending editDefinition request for ${document.uri.toString()} at ${position.line}:${position.character}`,
-      );
-
-      const response = await client.sendRequest("unison/editDefinition", {
-        textDocument: { uri: document.uri.toString() },
-        position: {
-          line: position.line,
-          character: position.character,
-        },
-      });
-
-      log(`Received response: ${JSON.stringify(response)}`);
-
-      // Check if the response has an error
-      if (response && typeof response === "object" && "error" in response) {
-        const errorMessage = (response as { error: string | null }).error;
-        if (errorMessage) {
-          window.showErrorMessage(errorMessage);
-        } else {
-          window.showInformationMessage("Definition edited");
-        }
+    // Check if the response has an error
+    if (response && typeof response === "object" && "error" in response) {
+      const errorMessage = (response as { error: string | null }).error;
+      if (errorMessage) {
+        window.showErrorMessage(errorMessage);
+      } else {
+        window.showInformationMessage(`Added to ${document.fileName}`);
       }
     }
   } catch (error) {
@@ -259,10 +220,6 @@ async function openOnShare() {
   }
 
   try {
-    log(
-      `Sending unison/openOnShare request for ${document.uri.toString()} at ${position.line}:${position.character}`,
-    );
-
     // Send custom LSP request to the Unison server
     const response = await client.sendRequest("unison/openOnShare", {
       textDocument: { uri: document.uri.toString() },
