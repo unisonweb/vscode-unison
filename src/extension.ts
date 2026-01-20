@@ -1,7 +1,6 @@
 import {
   workspace,
   window,
-  WorkspaceFolder,
   OutputChannel,
   commands,
   ExtensionContext,
@@ -14,7 +13,7 @@ import { connect } from "node:net";
 import { UnisonTreeProvider } from "./unisonTreeProvider";
 
 const outputChannel: OutputChannel = window.createOutputChannel("Unison");
-const clients: Map<string, LanguageClient> = new Map();
+let client: LanguageClient | undefined = undefined;
 // This is global mutable state so that when the extension host gets restarted after
 // the terminal is closed, we don't immediately open another one.
 let shouldOpenTerminal = true;
@@ -23,7 +22,7 @@ function log(msg: string) {
   outputChannel.appendLine(msg);
 }
 
-exports.activate = function (context: ExtensionContext) {
+exports.activate = async function (context: ExtensionContext) {
   // Register the tree view
   const apiBaseUrl =
     workspace.getConfiguration("unison").codebaseApiUrl ||
@@ -58,66 +57,35 @@ exports.activate = function (context: ExtensionContext) {
     ),
   );
 
-  workspace.workspaceFolders?.forEach((folder) => addWorkspaceFolder(folder));
-  workspace.onDidChangeWorkspaceFolders(({ added, removed }) => {
-    added.forEach((folder) => addWorkspaceFolder(folder));
-    removed.forEach((folder) => removeWorkspaceFolder(folder));
-  });
-
   // Register "Open on Share" command
   commands.registerCommand("unison.openOnShare", openOnShare);
+
+  // Start the global language client
+  await startLanguageClient();
 };
 
 exports.deactivate = async function () {
-  await Promise.all([...clients.values()].map((client) => client.stop()));
+  if (client) {
+    await client.stop();
+  }
 };
 
-async function addWorkspaceFolder(workspaceFolder: WorkspaceFolder) {
-  let folderPath = workspaceFolder.uri.fsPath;
-  if (clients.has(folderPath)) return;
+async function startLanguageClient() {
+  if (client) {
+    return; // Already started
+  }
 
-  let client = new LanguageClient("unison", "Unison", connectToServer, {
-    workspaceFolder,
+  client = new LanguageClient("unison", "Unison", connectToServer, {
     outputChannel,
     documentSelector: [{ language: "unison" }],
   });
 
-  log(`Activating unison language server at ${folderPath}`);
-  clients.set(folderPath, client);
+  log(`Starting Unison language client`);
   await client.start();
 }
 
-async function removeWorkspaceFolder(workspaceFolder: WorkspaceFolder) {
-  let folderPath = workspaceFolder.uri.fsPath;
-  let client = clients.get(folderPath);
-  if (client) {
-    log(`Deactivating unison language server at ${folderPath}`);
-    clients.delete(folderPath);
-    await client.stop();
-  }
-}
-
 function getActiveLanguageClient(): LanguageClient | undefined {
-  // Return the first available client or the one for the active workspace
-  if (clients.size === 0) {
-    return undefined;
-  }
-
-  const activeEditor = window.activeTextEditor;
-  if (activeEditor) {
-    const workspaceFolder = workspace.getWorkspaceFolder(
-      activeEditor.document.uri,
-    );
-    if (workspaceFolder) {
-      const client = clients.get(workspaceFolder.uri.fsPath);
-      if (client) {
-        return client;
-      }
-    }
-  }
-
-  // Return the first available client
-  return clients.values().next().value;
+  return client;
 }
 
 async function sleep(ms: number): Promise<void> {
@@ -184,14 +152,6 @@ async function editDefinition(fqn?: string) {
 
   const document = editor.document;
 
-  // Get the LSP client for this workspace
-  const workspaceFolder = workspace.getWorkspaceFolder(document.uri);
-  if (!workspaceFolder) {
-    window.showErrorMessage("File is not in a workspace");
-    return;
-  }
-
-  const client = clients.get(workspaceFolder.uri.fsPath);
   if (!client) {
     window.showErrorMessage("Unison language server not connected");
     return;
@@ -259,14 +219,6 @@ async function openOnShare() {
   const document = editor.document;
   const position = editor.selection.active;
 
-  // Get the LSP client for this workspace
-  const workspaceFolder = workspace.getWorkspaceFolder(document.uri);
-  if (!workspaceFolder) {
-    window.showErrorMessage("File is not in a workspace");
-    return;
-  }
-
-  const client = clients.get(workspaceFolder.uri.fsPath);
   if (!client) {
     window.showErrorMessage("Unison language server not connected");
     return;
