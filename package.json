@@ -136,6 +136,10 @@
             {
                 "command": "unison.editDefinition",
                 "title": "Edit Definition"
+            },
+            {
+                "command": "unison.editDefinitionAtCursor",
+                "title": "Edit Definition"
             }
         ],
         "menus": {
@@ -143,11 +147,15 @@
                 {
                     "command": "unison.editDefinition",
                     "when": "false"
+                },
+                {
+                    "command": "unison.editDefinitionAtCursor",
+                    "when": "false"
                 }
             ],
             "editor/context": [
                 {
-                    "command": "unison.editDefinition",
+                    "command": "unison.editDefinitionAtCursor",
                     "when": "editorLangId == unison",
                     "group": "navigation"
                 }

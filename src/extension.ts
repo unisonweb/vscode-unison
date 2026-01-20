@@ -28,7 +28,10 @@ exports.activate = function (context: ExtensionContext) {
   const apiBaseUrl =
     workspace.getConfiguration("unison").codebaseApiUrl ||
     "http://127.0.0.1:5858/codebase/api";
-  const treeProvider = new UnisonTreeProvider(apiBaseUrl, getActiveLanguageClient);
+  const treeProvider = new UnisonTreeProvider(
+    apiBaseUrl,
+    getActiveLanguageClient,
+  );
   const treeView = window.createTreeView("unisonCodebase", {
     treeDataProvider: treeProvider,
   });
@@ -45,6 +48,14 @@ exports.activate = function (context: ExtensionContext) {
   // Register the edit definition command
   context.subscriptions.push(
     commands.registerCommand("unison.editDefinition", editDefinition),
+  );
+
+  // Register the edit definition command for context menu
+  context.subscriptions.push(
+    commands.registerCommand(
+      "unison.editDefinitionAtCursor",
+      editDefinitionAtCursor,
+    ),
   );
 
   workspace.workspaceFolders?.forEach((folder) => addWorkspaceFolder(folder));
@@ -231,6 +242,11 @@ async function editDefinition(fqn?: string) {
     window.showErrorMessage(`Failed to edit definition: ${error}`);
     log(`Error editing definition: ${error}`);
   }
+}
+
+async function editDefinitionAtCursor() {
+  // Wrapper that calls editDefinition with no arguments for context menu
+  return editDefinition();
 }
 
 async function openOnShare() {
