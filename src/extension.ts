@@ -187,10 +187,11 @@ async function editDefinition(fqn?: string) {
     if (fqn) {
       log(`Sending editDefinition request for FQN: ${fqn}`);
 
-      const response = await client.sendRequest("editDefinition", {
+      const response = await client.sendRequest("unison/editDefinition", {
         textDocument: { uri: document.uri.toString() },
         fqn: fqn,
       });
+      log(`Received response: ${JSON.stringify(response)}`);
 
       // Check if the response has an error
       if (response && typeof response === "object" && "error" in response) {
@@ -208,13 +209,15 @@ async function editDefinition(fqn?: string) {
         `Sending editDefinition request for ${document.uri.toString()} at ${position.line}:${position.character}`,
       );
 
-      const response = await client.sendRequest("editDefinition", {
+      const response = await client.sendRequest("unison/editDefinition", {
         textDocument: { uri: document.uri.toString() },
         position: {
           line: position.line,
           character: position.character,
         },
       });
+
+      log(`Received response: ${JSON.stringify(response)}`);
 
       // Check if the response has an error
       if (response && typeof response === "object" && "error" in response) {
