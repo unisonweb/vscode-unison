@@ -136,7 +136,7 @@
             {
                 "command": "unison.switchProject",
                 "title": "Switch Unison Project",
-                "icon": "$(layers)"
+                "icon": "$(database)"
             },
             {
                 "command": "unison.editDefinition",
