@@ -60,6 +60,20 @@ exports.activate = async function (context: ExtensionContext) {
   // Register "Open on Share" command
   commands.registerCommand("unison.openOnShare", openOnShare);
 
+  // Listen for configuration changes
+  context.subscriptions.push(
+    workspace.onDidChangeConfiguration(async (e) => {
+      if (e.affectsConfiguration("unison.lspPort")) {
+        log("LSP port configuration changed, restarting client...");
+        await restartLanguageClient();
+      }
+      if (e.affectsConfiguration("unison.codebaseApiUrl")) {
+        log("Codebase API URL configuration changed, refreshing tree...");
+        treeProvider.refresh();
+      }
+    }),
+  );
+
   // Start the global language client
   await startLanguageClient();
 };
@@ -82,6 +96,15 @@ async function startLanguageClient() {
 
   log(`Starting Unison language client`);
   await client.start();
+}
+
+async function restartLanguageClient() {
+  if (client) {
+    log("Stopping Unison language client...");
+    await client.stop();
+    client = undefined;
+  }
+  await startLanguageClient();
 }
 
 function getActiveLanguageClient(): LanguageClient | undefined {
