@@ -5,6 +5,9 @@ import {
   OutputChannel,
   commands,
   ExtensionContext,
+  Position,
+  Selection,
+  TextEditorRevealType,
 } from "vscode";
 import { LanguageClient } from "vscode-languageclient/node";
 import { connect } from "node:net";
@@ -182,12 +185,22 @@ async function editDefinition(fqn?: string) {
     const response = await client.sendRequest("unison/editDefinition", request);
 
     // Check if the response has an error
-    if (response && typeof response === "object" && "error" in response) {
-      const errorMessage = (response as { error: string | null }).error;
+    if (response && typeof response === "object") {
+      const errorMessage = (response as { error?: string | null }).error;
       if (errorMessage) {
         window.showErrorMessage(errorMessage);
       } else {
-        window.showInformationMessage(`Added to ${document.fileName}`);
+        // Check the newlyAdded key to determine action
+        const newlyAdded = (response as { newlyAdded?: boolean }).newlyAdded;
+        if (newlyAdded) {
+          window.showInformationMessage("Edited.");
+          // Jump to the first line of the file on success
+          const firstLine = new Position(0, 0);
+          editor.selection = new Selection(firstLine, firstLine);
+          editor.revealRange(editor.selection, TextEditorRevealType.InCenter);
+        } else {
+          window.showInformationMessage("Definition already in scratch file");
+        }
       }
     }
   } catch (error) {
