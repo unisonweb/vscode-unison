@@ -1,5 +1,6 @@
 import * as vscode from "vscode";
 import * as http from "http";
+import { LanguageClient } from "vscode-languageclient/node";
 
 interface Project {
     projectName: string;
@@ -89,9 +90,19 @@ export class UnisonTreeProvider implements vscode.TreeDataProvider<UnisonTreeIte
         this._onDidChangeTreeData.event;
 
     private apiBaseUrl: string;
+    private getLanguageClient: () => LanguageClient | undefined;
+    private treeView?: vscode.TreeView<UnisonTreeItem>;
 
-    constructor(apiBaseUrl: string = "http://127.0.0.1:5858/codebase/api") {
+    constructor(
+        apiBaseUrl: string = "http://127.0.0.1:5858/codebase/api",
+        getLanguageClient: () => LanguageClient | undefined
+    ) {
         this.apiBaseUrl = apiBaseUrl;
+        this.getLanguageClient = getLanguageClient;
+    }
+
+    setTreeView(treeView: vscode.TreeView<UnisonTreeItem>): void {
+        this.treeView = treeView;
     }
 
     refresh(): void {
@@ -104,19 +115,11 @@ export class UnisonTreeProvider implements vscode.TreeDataProvider<UnisonTreeIte
 
     async getChildren(element?: UnisonTreeItem): Promise<UnisonTreeItem[]> {
         if (!element) {
-            // Root level: return projects
-            return this.getProjects();
+            // Root level: get current project context and show namespace contents
+            return this.getCurrentProjectContents();
         }
 
         switch (element.itemType) {
-            case "project":
-                return this.getBranches(element.projectName!);
-            case "branch":
-                return this.getNamespaceContents(
-                    element.projectName!,
-                    element.branchName!,
-                    ""
-                );
             case "namespace":
                 return this.getNamespaceContents(
                     element.projectName!,
@@ -128,41 +131,51 @@ export class UnisonTreeProvider implements vscode.TreeDataProvider<UnisonTreeIte
         }
     }
 
-    private async getProjects(): Promise<UnisonTreeItem[]> {
+    private async getCurrentProjectContents(): Promise<UnisonTreeItem[]> {
         try {
-            const projects = await this.apiRequest<Project[]>("/projects");
-            return projects.map(
-                (p) =>
-                    new UnisonTreeItem(
-                        p.projectName,
-                        "project",
-                        vscode.TreeItemCollapsibleState.Collapsed,
-                        p.projectName
-                    )
-            );
-        } catch (error) {
-            console.error("Failed to fetch projects:", error);
-            return [];
-        }
-    }
+            const client = this.getLanguageClient();
+            if (!client) {
+                console.error("No language client available");
+                if (this.treeView) {
+                    this.treeView.title = "No LSP client";
+                    this.treeView.description = "Unison Codebase";
+                }
+                return [];
+            }
 
-    private async getBranches(projectName: string): Promise<UnisonTreeItem[]> {
-        try {
-            const branches = await this.apiRequest<Branch[]>(
-                `/projects/${encodeURIComponent(projectName)}/branches`
-            );
-            return branches.map(
-                (b) =>
-                    new UnisonTreeItem(
-                        b.branchName,
-                        "branch",
-                        vscode.TreeItemCollapsibleState.Collapsed,
-                        projectName,
-                        b.branchName
-                    )
+            // Call the unison/projectContext LSP handler
+            const context = await client.sendRequest("unison/projectContext", {}) as {
+                projectName: string;
+                projectBranch: string;
+            };
+
+            if (!context.projectName || !context.projectBranch) {
+                console.error("No project context available");
+                if (this.treeView) {
+                    this.treeView.title = "No project context";
+                    this.treeView.description = "Unison Codebase";
+                }
+                return [];
+            }
+
+            // Update the tree view title with current project/branch
+            if (this.treeView) {
+                this.treeView.title = `${context.projectName}/${context.projectBranch}`;
+                this.treeView.description = "Unison Codebase";
+            }
+
+            // Return the namespace contents for the current project/branch
+            return this.getNamespaceContents(
+                context.projectName,
+                context.projectBranch,
+                ""
             );
         } catch (error) {
-            console.error("Failed to fetch branches:", error);
+            console.error("Failed to fetch project context:", error);
+            if (this.treeView) {
+                this.treeView.title = "Error fetching context";
+                this.treeView.description = "Unison Codebase";
+            }
             return [];
         }
     }

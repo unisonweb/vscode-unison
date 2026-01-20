@@ -28,10 +28,11 @@ exports.activate = function (context: ExtensionContext) {
   const apiBaseUrl =
     workspace.getConfiguration("unison").codebaseApiUrl ||
     "http://127.0.0.1:5858/codebase/api";
-  const treeProvider = new UnisonTreeProvider(apiBaseUrl);
+  const treeProvider = new UnisonTreeProvider(apiBaseUrl, getActiveLanguageClient);
   const treeView = window.createTreeView("unisonCodebase", {
     treeDataProvider: treeProvider,
   });
+  treeProvider.setTreeView(treeView);
   context.subscriptions.push(treeView);
 
   // Register the refresh command
@@ -83,6 +84,29 @@ async function removeWorkspaceFolder(workspaceFolder: WorkspaceFolder) {
     clients.delete(folderPath);
     await client.stop();
   }
+}
+
+function getActiveLanguageClient(): LanguageClient | undefined {
+  // Return the first available client or the one for the active workspace
+  if (clients.size === 0) {
+    return undefined;
+  }
+
+  const activeEditor = window.activeTextEditor;
+  if (activeEditor) {
+    const workspaceFolder = workspace.getWorkspaceFolder(
+      activeEditor.document.uri,
+    );
+    if (workspaceFolder) {
+      const client = clients.get(workspaceFolder.uri.fsPath);
+      if (client) {
+        return client;
+      }
+    }
+  }
+
+  // Return the first available client
+  return clients.values().next().value;
 }
 
 async function sleep(ms: number): Promise<void> {
