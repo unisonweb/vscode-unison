@@ -211,7 +211,7 @@ async function editDefinition(fqn?: string) {
         // Check the newlyAdded key to determine action
         const newlyAdded = (response as { newlyAdded?: boolean }).newlyAdded;
         if (newlyAdded) {
-          window.showInformationMessage("Edited.");
+          window.showInformationMessage("Added definition to scratch file");
           // Jump to the first line of the file on success
           const firstLine = new Position(0, 0);
           editor.selection = new Selection(firstLine, firstLine);
