@@ -24,21 +24,6 @@
     ],
     "author": "Unison Computing",
     "contributes": {
-        "commands": [
-            {
-                "command": "unison.openOnShare",
-                "title": "Open on Share"
-            }
-        ],
-        "menus": {
-            "editor/context": [
-                {
-                    "command": "unison.openOnShare",
-                    "when": "editorLangId == unison",
-                    "group": "navigation"
-                }
-            ]
-        },
         "languages": [
             {
                 "id": "unison",
@@ -129,6 +114,10 @@
         },
         "commands": [
             {
+                "command": "unison.openOnShare",
+                "title": "Open on Share"
+            },
+            {
                 "command": "unison.refreshCodebase",
                 "title": "Refresh Unison Codebase",
                 "icon": "$(refresh)"
@@ -154,6 +143,11 @@
                 }
             ],
             "editor/context": [
+                {
+                    "command": "unison.openOnShare",
+                    "when": "editorLangId == unison",
+                    "group": "navigation"
+                },
                 {
                     "command": "unison.editDefinitionAtCursor",
                     "when": "editorLangId == unison",
