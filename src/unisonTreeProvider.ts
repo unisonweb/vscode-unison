@@ -1,6 +1,7 @@
 import * as vscode from "vscode";
 import * as http from "http";
 import { LanguageClient } from "vscode-languageclient/node";
+import { sendCustomRequest } from "./utils";
 
 interface Project {
     projectName: string;
@@ -50,7 +51,7 @@ export class UnisonTreeItem extends vscode.TreeItem {
                 this.iconPath = new vscode.ThemeIcon("git-branch");
                 break;
             case "namespace":
-                this.iconPath = new vscode.ThemeIcon("folder");
+                // No icon for namespace - let the expansion arrow be the visual indicator
                 break;
             case "term":
                 this.iconPath = new vscode.ThemeIcon("symbol-function");
@@ -144,12 +145,12 @@ export class UnisonTreeProvider implements vscode.TreeDataProvider<UnisonTreeIte
             }
 
             // Call the unison/projectContext LSP handler
-            const context = await client.sendRequest("unison/projectContext", {}) as {
+            const context = await sendCustomRequest<{
                 projectName: string;
                 projectBranch: string;
-            };
+            }>(client, "unison/projectContext", {});
 
-            if (!context.projectName || !context.projectBranch) {
+            if (!context || !context.projectName || !context.projectBranch) {
                 console.error("No project context available");
                 if (this.treeView) {
                     this.treeView.title = "No project context";

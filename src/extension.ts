@@ -11,6 +11,7 @@ import {
 import { LanguageClient } from "vscode-languageclient/node";
 import { connect } from "node:net";
 import { UnisonTreeProvider } from "./unisonTreeProvider";
+import { sendCustomRequest } from "./utils";
 
 const outputChannel: OutputChannel = window.createOutputChannel("Unison");
 let client: LanguageClient | undefined = undefined;
@@ -200,7 +201,10 @@ async function editDefinition(fqn?: string) {
   }
 
   try {
-    const response = await client.sendRequest("unison/editDefinition", request);
+    const response = await sendCustomRequest<{
+      error?: string | null;
+      newlyAdded?: boolean;
+    }>(client, "unison/editDefinition", request);
 
     // Check if the response has an error
     if (response && typeof response === "object") {
@@ -249,13 +253,17 @@ async function openOnShare() {
 
   try {
     // Send custom LSP request to the Unison server
-    const response = await client.sendRequest("unison/openOnShare", {
-      textDocument: { uri: document.uri.toString() },
-      position: {
-        line: position.line,
-        character: position.character,
+    const response = await sendCustomRequest<{ error?: string | null }>(
+      client,
+      "unison/openOnShare",
+      {
+        textDocument: { uri: document.uri.toString() },
+        position: {
+          line: position.line,
+          character: position.character,
+        },
       },
-    });
+    );
 
     // Check if the response has an error
     if (response && typeof response === "object" && "error" in response) {
