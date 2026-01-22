@@ -3,7 +3,7 @@
     "displayName": "Unison Language",
     "publisher": "unison-lang",
     "description": "Official extension for unison language support",
-    "version": "1.4.1",
+    "version": "1.5.0",
     "icon": "images/unison.png",
     "main": "./out/main.js",
     "engines": {

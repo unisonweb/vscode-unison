@@ -1,5 +1,12 @@
 # Change Log
 
+## 1.5.0
+
+- Fix issue where LSP wouldn't work unless you were in a workspace folder.
+- Add new Codebase browser in the side panel
+- Add new "Open on Share" context-menu option (depends on latest unison trunk)
+- Add new Edit Definition context-menu option (depends on latest unison trunk)
+
 ## 1.4.1
 
 - Adds a file icon for the language
