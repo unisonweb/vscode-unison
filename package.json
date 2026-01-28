@@ -123,6 +123,11 @@
                 "icon": "$(refresh)"
             },
             {
+                "command": "unison.switchProject",
+                "title": "Switch Unison Project",
+                "icon": "$(database)"
+            },
+            {
                 "command": "unison.editDefinition",
                 "title": "Edit Definition"
             },
@@ -155,6 +160,11 @@
                 }
             ],
             "view/title": [
+                {
+                    "command": "unison.switchProject",
+                    "when": "view == unisonCodebase",
+                    "group": "navigation"
+                },
                 {
                     "command": "unison.refreshCodebase",
                     "when": "view == unisonCodebase",

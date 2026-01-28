@@ -7,6 +7,8 @@ import {
   Position,
   Selection,
   TextEditorRevealType,
+  StatusBarItem,
+  StatusBarAlignment,
 } from "vscode";
 import { LanguageClient } from "vscode-languageclient/node";
 import { connect } from "node:net";
@@ -15,6 +17,7 @@ import { sendCustomRequest } from "./utils";
 
 const outputChannel: OutputChannel = window.createOutputChannel("Unison");
 let client: LanguageClient | undefined = undefined;
+let statusBarItem: StatusBarItem;
 // This is global mutable state so that when the extension host gets restarted after
 // the terminal is closed, we don't immediately open another one.
 let shouldOpenTerminal = true;
@@ -24,6 +27,14 @@ function log(msg: string) {
 }
 
 exports.activate = async function (context: ExtensionContext) {
+  // Create status bar item
+  statusBarItem = window.createStatusBarItem(StatusBarAlignment.Left, 100);
+  statusBarItem.command = "unison.switchProject";
+  statusBarItem.text = "$(loading~spin) Unison";
+  statusBarItem.tooltip = "Click to switch project";
+  statusBarItem.show();
+  context.subscriptions.push(statusBarItem);
+
   // Register the tree view
   const apiBaseUrl =
     workspace.getConfiguration("unison").codebaseApiUrl ||
@@ -38,11 +49,19 @@ exports.activate = async function (context: ExtensionContext) {
   treeProvider.setTreeView(treeView);
   context.subscriptions.push(treeView);
 
+  // Store tree provider for use in switch project
+  const switchProjectHandler = () => switchProject(apiBaseUrl, treeProvider);
+
   // Register the refresh command
   context.subscriptions.push(
     commands.registerCommand("unison.refreshCodebase", () => {
       treeProvider.refresh();
     }),
+  );
+
+  // Register the switch project command
+  context.subscriptions.push(
+    commands.registerCommand("unison.switchProject", switchProjectHandler),
   );
 
   // Register the edit definition command
@@ -97,6 +116,7 @@ async function startLanguageClient() {
 
   log(`Starting Unison language client`);
   await client.start();
+  await updateStatusBar();
 }
 
 async function restartLanguageClient() {
@@ -110,6 +130,121 @@ async function restartLanguageClient() {
 
 function getActiveLanguageClient(): LanguageClient | undefined {
   return client;
+}
+
+async function updateStatusBar() {
+  if (!client) {
+    statusBarItem.text = "$(warning) Unison: Not connected";
+    statusBarItem.tooltip = "Language server not connected";
+    return;
+  }
+
+  try {
+    const context = await client.sendRequest("unison/projectContext", {}) as {
+      projectName: string;
+      projectBranch: string;
+    };
+
+    if (context.projectName && context.projectBranch) {
+      statusBarItem.text = `$(project) ${context.projectName}/${context.projectBranch}`;
+      statusBarItem.tooltip = "Click to switch project";
+    } else {
+      statusBarItem.text = "$(warning) Unison: No project";
+      statusBarItem.tooltip = "No project context available";
+    }
+  } catch (error) {
+    statusBarItem.text = "$(warning) Unison: Error";
+    statusBarItem.tooltip = "Failed to get project context";
+    log(`Error getting project context: ${error}`);
+  }
+}
+
+interface Project {
+  projectName: string;
+  activeBranchRef: string | null;
+}
+
+interface Branch {
+  branchName: string;
+}
+
+async function fetchProjects(apiBaseUrl: string): Promise<Project[]> {
+  const response = await fetch(`${apiBaseUrl}/projects`);
+  if (!response.ok) {
+    throw new Error(`Failed to fetch projects: ${response.statusText}`);
+  }
+  return response.json();
+}
+
+async function fetchBranches(apiBaseUrl: string, projectName: string): Promise<Branch[]> {
+  const response = await fetch(`${apiBaseUrl}/projects/${encodeURIComponent(projectName)}/branches`);
+  if (!response.ok) {
+    throw new Error(`Failed to fetch branches: ${response.statusText}`);
+  }
+  return response.json();
+}
+
+async function switchProject(apiBaseUrl: string, treeProvider: UnisonTreeProvider) {
+  if (!client) {
+    window.showErrorMessage("Unison language server not connected");
+    return;
+  }
+
+  try {
+    // Step 1: Fetch and select project
+    const projects = await fetchProjects(apiBaseUrl);
+    if (projects.length === 0) {
+      window.showInformationMessage("No projects available");
+      return;
+    }
+
+    const projectItems = projects.map(p => ({
+      label: p.projectName,
+      description: p.activeBranchRef || undefined,
+    }));
+
+    const selectedProject = await window.showQuickPick(projectItems, {
+      placeHolder: "Select a project",
+    });
+
+    if (!selectedProject) {
+      return; // User cancelled
+    }
+
+    // Step 2: Fetch and select branch
+    const branches = await fetchBranches(apiBaseUrl, selectedProject.label);
+    if (branches.length === 0) {
+      window.showInformationMessage(`No branches available for ${selectedProject.label}`);
+      return;
+    }
+
+    const branchItems = branches.map(b => ({
+      label: b.branchName,
+    }));
+
+    const selectedBranch = await window.showQuickPick(branchItems, {
+      placeHolder: `Select a branch for ${selectedProject.label}`,
+    });
+
+    if (!selectedBranch) {
+      return; // User cancelled
+    }
+
+    // Step 3: Call unison/switchProject
+    log(`Switching to ${selectedProject.label}/${selectedBranch.label}...`);
+    await client.sendRequest("unison/switchProject", {
+      projectName: selectedProject.label,
+      projectBranch: selectedBranch.label,
+    });
+
+    // Step 4: Update UI
+    await updateStatusBar();
+    treeProvider.refresh();
+    window.showInformationMessage(`Switched to ${selectedProject.label}/${selectedBranch.label}`);
+  } catch (error) {
+    window.showErrorMessage(`Failed to switch project: ${error}`);
+    log(`Error switching project: ${error}`);
+  }
 }
 
 async function sleep(ms: number): Promise<void> {
